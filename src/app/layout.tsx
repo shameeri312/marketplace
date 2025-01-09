@@ -89,7 +89,7 @@ export default function RootLayout({
       className={`${poppins.variable} ${openSans.variable}`}
       suppressHydrationWarning
     >
-      <body className="font-sans">{children}</body>
+      <body className="font-poppins">{children}</body>
     </html>
   );
 }

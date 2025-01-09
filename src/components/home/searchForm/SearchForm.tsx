@@ -1,16 +1,11 @@
 'use client';
 import React from 'react';
 import Form from 'next/form';
-import SearchFormReset from '@/components/root/searchForm/SearchFormReset';
+import SearchFormReset from '@/components/home/searchForm/SearchFormReset';
 import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useSearchParams } from 'next/navigation';
 
-const SearchForm = () => {
-  const searchParams = useSearchParams();
-
-  const query = searchParams.get('query') || undefined;
-
+const SearchForm = ({ query }: { query?: string }) => {
   return (
     <Form action={'/'} scroll={false} className={'search-form'}>
       <input

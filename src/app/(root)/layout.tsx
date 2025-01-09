@@ -1,4 +1,4 @@
-import Navbar from '@/components/root/navbar/Navbar';
+import Navbar from '@/components/home/navbar/Navbar';
 
 export default function Layout({
   children,
@@ -6,7 +6,7 @@ export default function Layout({
   children: React.ReactNode;
 }>) {
   return (
-    <main className={'font-open-sans'}>
+    <main>
       <Navbar />
       {children}
     </main>
