@@ -21,6 +21,7 @@ import { Separator } from '@/components/ui/separator';
 import { DialogTitle } from '@/components/ui/dialog';
 import { Text } from '@/components/ui/text';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
 
 const SignIn = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -64,7 +65,16 @@ const SignIn = () => {
       password: values.password,
     };
 
-    console.log(credentials);
+    setLoading(false);
+
+    toast(
+      <div className="w-full rounded-[4px] border-2 bg-secondary p-2">
+        <pre>
+          Submitted:
+          {JSON.stringify(credentials, null, 2)}
+        </pre>
+      </div>
+    );
   }
 
   return (

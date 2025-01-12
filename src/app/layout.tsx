@@ -1,6 +1,7 @@
 import Footer from '@/components/home/footer/Footer';
 import './globals.css';
 import localFont from 'next/font/local';
+import { Toaster } from 'sonner';
 
 const poppins = localFont({
   src: [
@@ -91,6 +92,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="font-poppins">
+        <Toaster />
         {children}
         <Footer />
       </body>
