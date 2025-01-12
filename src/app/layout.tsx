@@ -1,3 +1,4 @@
+import Footer from '@/components/home/footer/Footer';
 import './globals.css';
 import localFont from 'next/font/local';
 
@@ -89,7 +90,10 @@ export default function RootLayout({
       className={`${poppins.variable} ${openSans.variable}`}
       suppressHydrationWarning
     >
-      <body className="font-poppins">{children}</body>
+      <body className="font-poppins">
+        {children}
+        <Footer />
+      </body>
     </html>
   );
 }

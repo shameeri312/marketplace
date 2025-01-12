@@ -16,16 +16,7 @@ import { Title } from '@/components/ui/title';
 import { Separator } from '@/components/ui/separator';
 import { Text } from '@/components/ui/text';
 import { Input } from '@/components/ui/input';
-
-const menuLinks = [
-  { name: 'Mobile Phones', path: 'mobilePhones' },
-  { name: 'Cars', path: 'cars' },
-  { name: 'Motorcycles', path: 'motorcycles' },
-  { name: 'Houses', path: 'houses' },
-  { name: 'Tablets', path: 'tablets' },
-  { name: 'Property', path: 'property' },
-  { name: 'Fashion', path: 'fashion' },
-];
+import { menuLinks } from '@/lib/links';
 
 export function CategoriesMenu() {
   const [search, setSearch] = React.useState<string>('');

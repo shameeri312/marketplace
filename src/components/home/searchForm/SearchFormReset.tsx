@@ -12,7 +12,7 @@ const SearchFormReset = () => {
 
   return (
     <Button type={'reset'} variant={'ghost'} size={'icon'} onClick={reset}>
-      <Link href={'/'} className={'search-btn'}>
+      <Link href={'/items'} className={'search-btn'}>
         <X className={'size-5'} />
       </Link>
     </Button>

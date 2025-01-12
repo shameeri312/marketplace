@@ -45,7 +45,7 @@ const Navbar = () => {
             <MenuLinks />
             <SheetTrigger
               className={
-                'grid h-10 w-10 place-content-center rounded-md bg-white text-secondary-foreground'
+                'grid h-10 w-10 place-content-center rounded-md bg-white text-secondary-foreground md:hidden'
               }
             >
               <CiMenuBurger size={24} />

@@ -16,7 +16,7 @@ const Text: React.FC<TextProps> = ({
   return (
     <Component
       className={cn(
-        'text text-sm md:text-base', // Default text styles
+        'text text-xs sm:text-sm md:text-base', // Default text styles
         className // Allow for additional custom styles
       )}
       {...props}

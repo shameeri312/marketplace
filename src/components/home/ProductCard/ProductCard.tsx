@@ -2,26 +2,26 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { Title } from '@/components/ui/title';
-import { IoMdHeartEmpty, IoMdHeart } from 'react-icons/io';
+import { IoMdHeartEmpty } from 'react-icons/io';
 import Image from 'next/image';
 import React from 'react';
 import { formatRelativeTime } from '@/lib/utils';
 
 const ProductCard = ({ content }: { content: any }) => {
   return (
-    <Card className="w-[270px] space-y-3 overflow-hidden p-1 sm:w-[300px] md:w-full">
+    <Card className="space-y-3 overflow-hidden p-1 md:w-full">
       <Image
-        src={content.images[0]}
-        alt={content.name}
-        className="h-[150px] rounded-t-md object-cover sm:h-[200px] sm:w-full"
+        src={content?.images[0] || '/job.jpg'}
+        alt={content.name || 'image'}
+        className="h-[100px] rounded-t-md object-cover sm:w-full md:h-[150px] xl:h-[200px]"
         width={400}
         height={200}
       />
-      <CardContent>
+      <CardContent className="md:px-auto px-2 pb-2 md:pb-0">
         <div className="flex items-center justify-between">
-          <Text className="font-medium" as="p">
+          <Text className="font-semibold" as="p">
             <span className="text-accent-foreground">
-              {content.price} {content.currency}{' '}
+              {content.price || content.salary} {content.currency}{' '}
             </span>
           </Text>
 
@@ -29,12 +29,12 @@ const ProductCard = ({ content }: { content: any }) => {
         </div>
         <Title
           size="sm"
-          className="catpitalize text-secondary-foreground"
+          className="catpitalize truncate text-secondary-foreground"
           as="h6"
         >
-          {content.name}
+          {content.name || content.title}
         </Title>
-        <Text className="font-medium" as="p">
+        <Text className="truncate font-medium" as="p">
           <span className="text-xs font-light text-accent-foreground sm:text-sm">
             {content.address.street}, {content.address.city}
           </span>
