@@ -2,7 +2,7 @@ import { Title } from '@/components/ui/title';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
-import CardsWrapper from '../../cardsWrapper/CardsWrapper';
+import CardsWrapper from '../../../items/cardsWrapper/CardsWrapper';
 import { jobs } from '@/lib/data';
 const Jobs = () => {
   return (

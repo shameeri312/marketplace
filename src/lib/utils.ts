@@ -23,3 +23,8 @@ export const formatRelativeTime = (date: Date) => {
   // Format the date into a relative time string
   return timeAgo.format(date);
 };
+
+export const capitalize = (str: string): string => {
+  if (!str) return '';
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+};

@@ -13,7 +13,7 @@ export const mobiles = [
       storage: '128 GB',
       ram: '6 GB',
     },
-    category: 'Mobile Phones',
+    category: ['mobilePhones'],
     availability: true,
     colors: ['Graphite', 'Silver', 'Gold', 'Sierra Blue'],
     address: {
@@ -30,7 +30,7 @@ export const mobiles = [
       'mobile',
       'smartphone',
       'ios',
-      'Mobile Phones',
+      'mobilePhones',
     ],
   },
   {
@@ -47,7 +47,7 @@ export const mobiles = [
       storage: '256 GB',
       ram: '12 GB',
     },
-    category: 'Mobile Phones',
+    category: ['mobilePhones'],
     availability: true,
     colors: ['Phantom Black', 'Phantom Silver', 'Navy'],
     address: {
@@ -64,7 +64,7 @@ export const mobiles = [
       'samsung',
       'mobile',
       'smartphone',
-      'Mobile Phones',
+      'mobilePhones',
     ],
   },
   {
@@ -81,7 +81,7 @@ export const mobiles = [
       storage: '128 GB',
       ram: '8 GB',
     },
-    category: 'Mobile Phones',
+    category: ['mobilePhones'],
     availability: false,
     colors: ['Obsidian', 'Lemongrass', 'Snow'],
     address: {
@@ -98,7 +98,7 @@ export const mobiles = [
       'android',
       'mobile',
       'smartphone',
-      'Mobile Phones',
+      'mobilePhones',
     ],
   },
   {
@@ -115,7 +115,7 @@ export const mobiles = [
       storage: '256 GB',
       ram: '12 GB',
     },
-    category: 'Mobile Phones',
+    category: ['mobilePhones'],
     availability: true,
     colors: ['Titan Black', 'Eternal Green'],
     address: {
@@ -126,13 +126,13 @@ export const mobiles = [
       postalCode: '38000',
     },
     createdAt: '2025-01-09T01:00:26.000Z',
-    keywords: ['oneplus', 'android', 'mobile', 'smartphone', 'Mobile Phones'],
+    keywords: ['oneplus', 'android', 'mobile', 'smartphone', 'mobilePhones'],
   },
 ];
 
 export const cars = [
   {
-    id: 1,
+    id: 5,
     name: 'Toyota Aqua',
     brand: 'Toyota',
     price: 3500000,
@@ -145,7 +145,7 @@ export const cars = [
       seats: '5',
       mileage: '25 km/l',
     },
-    category: 'Cars',
+    category: ['cars', 'vehicles'],
     availability: true,
     colors: ['White', 'Silver', 'Blue', 'Black'],
     address: {
@@ -156,10 +156,10 @@ export const cars = [
       postalCode: '54000',
     },
     createdAt: '2025-01-09T03:00:26.000Z',
-    keywords: ['toyota', 'aqua', 'car', 'hybrid', 'Cars'],
+    keywords: ['toyota', 'aqua', 'car', 'hybrid', 'cars', 'vehicles'],
   },
   {
-    id: 2,
+    id: 6,
     name: 'Toyota Corolla',
     brand: 'Toyota',
     price: 5500000,
@@ -172,7 +172,7 @@ export const cars = [
       seats: '5',
       mileage: '14 km/l',
     },
-    category: 'Cars',
+    category: ['cars', 'vehicles'],
     availability: true,
     colors: ['White', 'Silver', 'Black', 'Grey'],
     address: {
@@ -183,10 +183,10 @@ export const cars = [
       postalCode: '74000',
     },
     createdAt: '2025-01-09T01:00:26.000Z',
-    keywords: ['toyota', 'corolla', 'car', 'sedan', 'Cars'],
+    keywords: ['toyota', 'corolla', 'car', 'sedan', 'cars', 'vehicles'],
   },
   {
-    id: 3,
+    id: 7,
     name: 'Suzuki Cultus',
     brand: 'Suzuki',
     price: 2500000,
@@ -199,7 +199,7 @@ export const cars = [
       seats: '5',
       mileage: '18 km/l',
     },
-    category: 'Cars',
+    category: ['cars', 'vehicles'],
     availability: false,
     colors: ['White', 'Silver', 'Red', 'Blue'],
     address: {
@@ -210,10 +210,10 @@ export const cars = [
       postalCode: '44000',
     },
     createdAt: '2025-01-09T02:20:26.000Z',
-    keywords: ['suzuki', 'cultus', 'car', 'compact', 'Cars'],
+    keywords: ['suzuki', 'cultus', 'car', 'compact', 'cars', 'vehicles'],
   },
   {
-    id: 4,
+    id: 8,
     name: 'Toyota Yaris',
     brand: 'Toyota',
     price: 4000000,
@@ -226,7 +226,7 @@ export const cars = [
       seats: '5',
       mileage: '16 km/l',
     },
-    category: 'Cars',
+    category: ['cars', 'vehicles'],
     availability: true,
     colors: ['White', 'Silver', 'Red', 'Black'],
     address: {
@@ -237,19 +237,27 @@ export const cars = [
       postalCode: '38000',
     },
     createdAt: '2025-01-09T03:00:26.000Z',
-    keywords: ['toyota', 'yaris', 'car', 'compact', 'sedan', 'Cars'],
+    keywords: [
+      'toyota',
+      'yaris',
+      'car',
+      'compact',
+      'sedan',
+      'cars',
+      'vehicles',
+    ],
   },
 ];
 
 export const property = [
   {
-    id: 1,
+    id: 9,
     name: '1125 Square Feet Residential Plot In Wapda Town - Block A For Sale',
     brand: '',
     price: 25000000,
     currency: 'PKR',
     images: ['/property/property01.webp'],
-    category: 'Property',
+    category: ['property'],
     address: {
       street: '789 Tech Avenue',
       city: 'Islamabad',
@@ -258,16 +266,16 @@ export const property = [
       postalCode: '44000',
     },
     createdAt: '2025-01-09T02:20:26.000Z',
-    keywords: ['plot', 'residential', 'property', 'real estate', 'Property'],
+    keywords: ['plot', 'residential', 'property', 'real estate', 'property'],
   },
   {
-    id: 2,
+    id: 10,
     name: '1 Kanal Luxurious House in DHA Phase 6 - For Sale',
     brand: 'DHA Builders',
     price: 85000000,
     currency: 'PKR',
     images: ['/property/property02.webp'],
-    category: 'Houses',
+    category: ['Houses', 'property'],
     address: {
       street: '123 Elite Lane',
       city: 'Lahore',
@@ -279,13 +287,13 @@ export const property = [
     keywords: ['luxury', 'house', 'property', 'real estate', 'Houses'],
   },
   {
-    id: 3,
+    id: 11,
     name: '5 Marla Double Storey House in Bahria Town - For Sale',
     brand: 'Bahria Developers',
     price: 15000000,
     currency: 'PKR',
     images: ['/property/property03.webp'],
-    category: 'Houses',
+    category: ['Houses', 'property'],
     address: {
       street: '456 Bahria Main Boulevard',
       city: 'Karachi',
@@ -297,13 +305,13 @@ export const property = [
     keywords: ['house', 'double storey', 'real estate', 'Houses'],
   },
   {
-    id: 4,
+    id: 12,
     name: '10 Marla Commercial Plot in Blue World City - For Sale',
     brand: '',
     price: 40000000,
     currency: 'PKR',
     images: ['/property/property04.webp'],
-    category: 'Property',
+    category: ['property'],
     address: {
       street: '101 Blue Boulevard',
       city: 'Rawalpindi',
@@ -317,14 +325,14 @@ export const property = [
       'real estate',
       'property',
       'investment',
-      'Property',
+      'property',
     ],
   },
 ];
 
 export const bikes = [
   {
-    id: 1,
+    id: 13,
     name: 'Honda CG 125 - 2023 Model',
     brand: 'Honda',
     price: 185000,
@@ -336,7 +344,7 @@ export const bikes = [
       transmission: '4-speed',
       color: 'Red',
     },
-    category: 'Motorcycles',
+    category: ['Motorcycles', 'bikes'],
     address: {
       street: '45 Auto Market Road',
       city: 'Lahore',
@@ -348,7 +356,7 @@ export const bikes = [
     keywords: ['honda', 'cg125', 'motorcycle', 'bike', 'Honda Motorcycles'],
   },
   {
-    id: 2,
+    id: 14,
     name: 'Yamaha YBR 125 - 2023 Model',
     brand: 'Yamaha',
     price: 275000,
@@ -360,7 +368,7 @@ export const bikes = [
       transmission: '5-speed',
       color: 'Black',
     },
-    category: 'Motorcycles',
+    category: ['Motorcycles', 'bikes'],
     address: {
       street: '67 Bike Street',
       city: 'Karachi',
@@ -372,7 +380,7 @@ export const bikes = [
     keywords: ['yamaha', 'ybr125', 'motorcycle', 'bike', 'Yamaha Motorcycles'],
   },
   {
-    id: 3,
+    id: 15,
     name: 'Suzuki GS 150 SE - 2023 Model',
     brand: 'Suzuki',
     price: 250000,
@@ -384,7 +392,7 @@ export const bikes = [
       transmission: '5-speed',
       color: 'Blue',
     },
-    category: 'Motorcycles',
+    category: ['Motorcycles', 'bikes'],
     address: {
       street: '123 Bike Plaza',
       city: 'Islamabad',
@@ -396,7 +404,7 @@ export const bikes = [
     keywords: ['suzuki', 'gs150', 'motorcycle', 'bike', 'Suzuki Motorcycles'],
   },
   {
-    id: 4,
+    id: 16,
     name: 'Kawasaki Ninja 400 - 2023 Model',
     brand: 'Kawasaki',
     price: 1200000,
@@ -408,7 +416,7 @@ export const bikes = [
       transmission: '6-speed',
       color: 'Green',
     },
-    category: 'Motorcycles',
+    category: ['Motorcycles', 'bikes'],
     address: {
       street: '89 Race Track Lane',
       city: 'Rawalpindi',
@@ -429,7 +437,7 @@ export const bikes = [
 
 export const jobs = [
   {
-    id: 1,
+    id: 17,
     title: 'Software Engineer',
     company: 'Tech Solutions Pvt. Ltd.',
     address: {
@@ -450,7 +458,7 @@ export const jobs = [
       'Proficiency in JavaScript, React, and Node.js',
     ],
     createdAt: '2025-01-10T10:00:00.000Z',
-    category: 'IT & Software',
+    category: ['jobs', 'IT & Software'],
     keywords: [
       'software engineer',
       'developer',
@@ -462,7 +470,7 @@ export const jobs = [
     ],
   },
   {
-    id: 2,
+    id: 18,
     title: 'Graphic Designer',
     company: 'Creative Minds Studio',
     address: {
@@ -483,7 +491,7 @@ export const jobs = [
       'Ability to meet deadlines',
     ],
     createdAt: '2025-01-09T14:30:00.000Z',
-    category: 'Design & Creative',
+    category: ['jobs', 'Design & Creative'],
     keywords: [
       'graphic designer',
       'design',
@@ -495,7 +503,7 @@ export const jobs = [
     ],
   },
   {
-    id: 3,
+    id: 19,
     title: 'Digital Marketing Specialist',
     company: 'BizGrowth Agency',
     address: {
@@ -516,7 +524,7 @@ export const jobs = [
       'Strong analytical skills',
     ],
     createdAt: '2025-01-08T09:45:00.000Z',
-    category: 'Marketing & Sales',
+    category: ['jobs', 'Marketing & Sales'],
     keywords: [
       'digital marketing',
       'SEO',
@@ -528,7 +536,7 @@ export const jobs = [
     ],
   },
   {
-    id: 4,
+    id: 20,
     title: 'Customer Support Representative',
     company: 'Global Solutions Ltd.',
     address: {
@@ -549,7 +557,7 @@ export const jobs = [
       'Proficiency in MS Office and CRM software',
     ],
     createdAt: '2025-01-11T12:00:00.000Z',
-    category: 'Customer Service',
+    category: ['jobs', 'Customer Service'],
     keywords: [
       'customer support',
       'representative',
@@ -561,3 +569,5 @@ export const jobs = [
     ],
   },
 ];
+
+export const allItems = [...mobiles, ...cars, ...property, ...bikes];

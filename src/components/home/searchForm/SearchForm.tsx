@@ -18,7 +18,12 @@ const SearchForm = ({ query }: { query?: string }) => {
 
       {query && <SearchFormReset />}
 
-      <Button type={'submit'} variant={'outline'} className={''} size={'icon'}>
+      <Button
+        type={'submit'}
+        variant={'outline'}
+        className={'size-8'}
+        size={'icon'}
+      >
         <Search />
       </Button>
     </Form>

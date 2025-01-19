@@ -4,7 +4,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Title } from '@/components/ui/title';
 import { categories } from '@/lib/categories';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { Label } from '@/components/ui/label';
 
@@ -29,17 +29,37 @@ const Sidebar = ({
     if (categoryParam) {
       setSelectedCategories(categoryParam.split(','));
     }
+    if (query) {
+      console.log(selectedCategories);
+    }
   }, [searchParams]);
 
   // Create or update the query string with the given key/value pair
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set(name, value);
-      return params.toString();
-    },
-    [searchParams]
-  );
+  // const createQueryString = useCallback(
+  //   (name: string, value: string) => {
+  //     const params = new URLSearchParams(searchParams.toString());
+  //     params.set(name, value);
+  //     return params.toString();
+  //   },
+
+  //   [searchParams]
+  // );
+
+  // const handleCategoryToggle = (category: string) => {
+  //   const updatedCategories = selectedCategories.includes(category)
+  //     ? selectedCategories.filter((item) => item !== category)
+  //     : [...selectedCategories, category];
+
+  //   setSelectedCategories(updatedCategories);
+
+  //   const queryString = createQueryString(
+  //     'category',
+  //     updatedCategories.join(',')
+  //   );
+
+  //   // Push the updated query string to the router
+  //   router.push(`${pathname}?${queryString}`);
+  // };
 
   const handleCategoryToggle = (category: string) => {
     const updatedCategories = selectedCategories.includes(category)
@@ -48,13 +68,15 @@ const Sidebar = ({
 
     setSelectedCategories(updatedCategories);
 
-    const queryString = createQueryString(
-      'category',
-      updatedCategories.join(',')
-    );
+    // Create a new search params object excluding the 'query' parameter
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('query'); // Remove the query parameter
 
-    // Push the updated query string to the router
-    router.push(`${pathname}?${queryString}`);
+    // Add or update the 'category' parameter
+    params.set('category', updatedCategories.join(','));
+
+    // Replace the URL without redirecting
+    router.replace(`${pathname}?${params.toString()}`);
   };
 
   return (

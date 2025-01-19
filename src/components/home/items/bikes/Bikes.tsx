@@ -2,7 +2,7 @@ import { Title } from '@/components/ui/title';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
-import CardsWrapper from '../../cardsWrapper/CardsWrapper';
+import CardsWrapper from '../../../items/cardsWrapper/CardsWrapper';
 import { bikes } from '@/lib/data';
 
 const Bikes = () => {
@@ -10,7 +10,7 @@ const Bikes = () => {
     <>
       <div className="flex items-center justify-between px-2">
         <Title className="w-max" size="md" as="h2">
-          Jobs
+          Bikes
         </Title>
         <div>
           <Link

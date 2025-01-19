@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+'use client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { Title } from '@/components/ui/title';
@@ -6,10 +7,16 @@ import { IoMdHeartEmpty } from 'react-icons/io';
 import Image from 'next/image';
 import React from 'react';
 import { formatRelativeTime } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 const ProductCard = ({ content }: { content: any }) => {
+  const router = useRouter();
+
   return (
-    <Card className="space-y-3 overflow-hidden p-1 md:w-full">
+    <Card
+      onClick={() => router.push(`/item/${content.id}`)}
+      className="cursor-pointer space-y-3 overflow-hidden p-1 shadow-md md:w-full"
+    >
       <Image
         src={content?.images[0] || '/job.jpg'}
         alt={content.name || 'image'}

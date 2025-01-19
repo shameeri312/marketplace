@@ -1,5 +1,5 @@
 import React from 'react';
-import CardsWrapper from '../../cardsWrapper/CardsWrapper';
+import CardsWrapper from '../../../items/cardsWrapper/CardsWrapper';
 import { mobiles } from '@/lib/data';
 import { Title } from '@/components/ui/title';
 import Link from 'next/link';
@@ -14,7 +14,7 @@ const MobilePhones = () => {
         </Title>
         <div>
           <Link
-            href="/category/mobiles"
+            href="/category/mobilePhones"
             className="flex text-xs text-primary sm:text-sm"
           >
             View More <ChevronRight className="size-4 sm:size-5" />

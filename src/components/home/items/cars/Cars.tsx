@@ -1,5 +1,5 @@
 import React from 'react';
-import CardsWrapper from '../../cardsWrapper/CardsWrapper';
+import CardsWrapper from '../../../items/cardsWrapper/CardsWrapper';
 import { cars } from '@/lib/data';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
@@ -14,7 +14,7 @@ const Cars = () => {
         </Title>
         <div>
           <Link
-            href="/category/cars"
+            href="/category/vehicles"
             className="flex text-xs text-primary sm:text-sm"
           >
             View More <ChevronRight className="size-4 sm:size-5" />
