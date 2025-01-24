@@ -82,7 +82,7 @@
   }
 
   .search-form {
-    @apply flex w-full gap-1 rounded-md bg-background p-1 text-sm;
+    @apply flex w-full gap-1 rounded-md border border-input bg-background p-1 text-sm;
   }
 
   .site-title {

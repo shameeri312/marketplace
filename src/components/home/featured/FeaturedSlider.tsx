@@ -15,7 +15,7 @@ const FeaturedSlider = () => {
   return (
     <Swiper
       modules={[Pagination, Autoplay]}
-      className="h-[150px] w-full rounded-3xl sm:h-[200px] md:h-[250px] lg:h-[300px]"
+      className="mt-2 h-[150px] w-full rounded-2xl sm:h-[200px] md:mt-4 md:h-[250px] lg:h-[300px]"
       spaceBetween={0}
       slidesPerView={1}
       pagination={{ clickable: true }}

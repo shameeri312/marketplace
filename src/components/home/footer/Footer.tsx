@@ -8,7 +8,7 @@ import React from 'react';
 const Footer = () => {
   return (
     <>
-      <footer className="padding bg-muted">
+      <footer className="padding bg-muted/40">
         <div className="container mx-auto flex flex-col flex-wrap items-start gap-6 md:flex-row md:flex-nowrap md:gap-0">
           <div className="mx-auto w-64 flex-shrink-0 text-center md:mx-0 md:text-left">
             <Link href={'/'} className={'w-max'}>
@@ -76,7 +76,7 @@ const Footer = () => {
           </div>
         </div>
       </footer>
-      <div className="border-t-2 bg-muted py-4 text-center">
+      <div className="border-t-2 bg-muted/70 py-4 text-center">
         <Title size="sm" className="text-xs md:text-sm">
           ©COPRYRIGHT 2025 | EMART
         </Title>

@@ -1,10 +1,5 @@
 export const categories = {
-  'Mobiles Phones': [
-    'Mobile Phones',
-    'Accessories',
-    'Smart Watches',
-    'Tablets',
-  ],
+  'Mobile Phones': ['Mobile Phones', 'Accessories', 'Smart Watches', 'Tablets'],
   Vehicles: [
     'Cars',
     'Cars Accessories',

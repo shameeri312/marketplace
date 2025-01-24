@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Footer from '@/components/home/footer/Footer';
 import './globals.css';
 import localFont from 'next/font/local';
 import { Toaster } from 'sonner';
+import { SessionProvider } from 'next-auth/react';
+import Navbar from '@/components/home/navbar/Navbar';
 
 const poppins = localFont({
   src: [
@@ -82,8 +85,10 @@ export const metadata = {
 
 export default function RootLayout({
   children,
+  session,
 }: Readonly<{
   children: React.ReactNode;
+  session: any;
 }>) {
   return (
     <html
@@ -93,8 +98,13 @@ export default function RootLayout({
     >
       <body className="font-poppins">
         <Toaster />
-        {children}
-        <Footer />
+        <SessionProvider session={session}>
+          <Navbar />
+
+          {children}
+
+          <Footer />
+        </SessionProvider>
       </body>
     </html>
   );
