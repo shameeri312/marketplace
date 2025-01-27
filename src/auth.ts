@@ -4,6 +4,10 @@ import Google from 'next-auth/providers/google';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    }),
     Credentials({
       name: 'Credentials',
 
@@ -39,14 +43,30 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           const user = await res.json();
 
           console.log('---------------------------');
-          console.log('----> ', user, username, password, email);
+          console.log('----> ', user.access);
           console.log('---------------------------');
 
-          //   return null;
+          const url = `${process.env.API_URL_PREFIX}/api/user/profile/`; // this will get token to stay logged in and authorized
+
+          const profile_res = await fetch(url, {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${user.access}`,
+            },
+          });
+
+          const profile = await profile_res.json();
+
+          console.log(profile);
+
+          // return null;
           return Promise.resolve({
             username: username ?? '',
             email: email ?? '',
             token: user.access,
+            firstName: profile?.first_name || '',
+            lastName: profile?.last_name || '',
+            image: profile?.photo,
           });
         } else {
           const errorData = await res.json();
@@ -59,8 +79,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
       },
     }),
-    Google,
   ],
+  debug: true,
 
   callbacks: {
     jwt: async ({ token, user }) => {

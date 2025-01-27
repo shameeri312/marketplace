@@ -91,7 +91,6 @@ const SignIn = () => {
                 <FormLabel>Email or Username</FormLabel>
                 <FormControl>
                   <Input
-                    autoComplete="off"
                     className="w-full rounded-lg"
                     placeholder="Enter your email or username"
                     {...field}

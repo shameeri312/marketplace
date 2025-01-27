@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -28,7 +29,8 @@ import { Separator } from '@/components/ui/separator';
 const Navbar = () => {
   const [isOpen, toggleDialog] = useState<boolean>(false);
   const [isAuth, setIsAuth] = useState<boolean>(false);
-  const { data: session } = useSession(); // get session
+  const { data: session }: any = useSession(); // get session
+
   const params = useSearchParams();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState<string>(
@@ -132,8 +134,14 @@ const Navbar = () => {
                 <Popover>
                   <PopoverTrigger className="flex items-center">
                     <Avatar>
-                      <AvatarImage src={session?.user?.image || undefined} />
-                      <AvatarFallback>MT</AvatarFallback>
+                      <AvatarImage
+                        src={process.env.API_URL_PREFIX + session?.user?.image}
+                        className="object-cover"
+                      />
+                      <AvatarFallback>
+                        {session?.user?.firstName[0] +
+                          session?.user?.lastName[0]}
+                      </AvatarFallback>
                     </Avatar>
                     <ChevronDown />
                   </PopoverTrigger>
@@ -141,15 +149,23 @@ const Navbar = () => {
                   <PopoverContent className="mr-4 w-[200px] pb-2 lg:w-[250px] xl:mr-8 2xl:mr-28">
                     <div className="flex flex-col items-center gap-2">
                       <Avatar className="size-20">
-                        <AvatarImage src={session?.user?.image || undefined} />
-                        <AvatarFallback>MT</AvatarFallback>
+                        <AvatarImage
+                          src={
+                            process.env.API_URL_PREFIX + session?.user?.image
+                          }
+                          className="object-cover"
+                        />
+                        <AvatarFallback>
+                          {session?.user?.firstName[0] +
+                            session?.user?.lastName[0]}
+                        </AvatarFallback>
                       </Avatar>
                       <Title size="sm" className="text-center">
-                        {session?.user?.name}
+                        {session?.user?.firstName} {session?.user?.lastName}
                       </Title>
                       <Button
                         variant={'outline'}
-                        className="h-8 border-neutral-400 font-light"
+                        className="border-neutral-400 font-light"
                         size={'sm'}
                       >
                         Edit profile <Pencil className="text-neutral-600" />
