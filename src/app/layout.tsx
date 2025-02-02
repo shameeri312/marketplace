@@ -5,6 +5,8 @@ import localFont from 'next/font/local';
 import { Toaster } from 'sonner';
 import { SessionProvider } from 'next-auth/react';
 import Navbar from '@/components/home/navbar/Navbar';
+import { Suspense } from 'react';
+import Loading from '@/components/loading/Loading';
 
 const poppins = localFont({
   src: [
@@ -99,7 +101,9 @@ export default function RootLayout({
       <body className="font-poppins">
         <Toaster />
         <SessionProvider session={session}>
-          <Navbar />
+          <Suspense fallback={<Loading />}>
+            <Navbar />
+          </Suspense>
 
           {children}
 

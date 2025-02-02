@@ -1,26 +1,36 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import { Card, CardContent } from '@/components/ui/card';
-import { Text } from '@/components/ui/text';
-import { Title } from '@/components/ui/title';
 import { IoMdHeartEmpty } from 'react-icons/io';
-import Image from 'next/image';
-import React from 'react';
-import { formatRelativeTime } from '@/lib/utils';
+import { Title } from '@/components/ui/title';
 import { useRouter } from 'next/navigation';
+import { Text } from '@/components/ui/text';
+import Image from 'next/image';
+import React, { useEffect, useState } from 'react';
 
 const ProductCard = ({ content }: { content: any }) => {
   const router = useRouter();
+  const [url, setUrl] = useState<string>('');
+
+  const image = content?.image1.split('/');
+
+  useEffect(() => {
+    if (image.includes('media')) {
+      setUrl(`${process.env.API_URL_PREFIX}${content?.image1}`);
+    } else {
+      setUrl(content?.image1);
+    }
+  }, [content]);
 
   return (
     <Card
       onClick={() => router.push(`/item/${content.id}`)}
-      className="cursor-pointer space-y-3 overflow-hidden p-1 shadow-md md:w-full"
+      className="w-[250px] cursor-pointer space-y-3 overflow-hidden p-1 shadow-md md:w-full"
     >
       <Image
-        src={content?.images[0] || '/job.jpg'}
+        src={url || '/job.jpg'}
         alt={content.name || 'image'}
-        className="h-[100px] rounded-t-md object-cover sm:w-full md:h-[150px] xl:h-[200px]"
+        className="h-[120px] rounded-t-md object-cover sm:w-full md:h-[150px] xl:h-[200px]"
         width={400}
         height={200}
       />
@@ -43,13 +53,15 @@ const ProductCard = ({ content }: { content: any }) => {
         </Title>
         <Text className="truncate font-medium" as="p">
           <span className="text-xs font-light text-accent-foreground sm:text-sm">
-            {content.address.street}, {content.address.city}
+            {content?.street || 'Lorem ipsum dolor sit amet Lorem, ipsum dolor'}
+            , {content?.city}
           </span>
         </Text>
 
         <Text className="font-medium" as="p">
           <span className="text-xs font-light text-accent-foreground sm:text-sm">
-            {formatRelativeTime(new Date(content.createdAt))}
+            {/* {formatRelativeTime()} */}
+            {content?.created_at || 'a while ago'}
           </span>
         </Text>
       </CardContent>

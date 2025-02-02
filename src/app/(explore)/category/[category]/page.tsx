@@ -10,7 +10,7 @@ interface Params {
 }
 
 const CategoryPage = async ({ params }: { params: Promise<Params> }) => {
-  const category = decodeURIComponent((await params)?.category) || undefined;
+  const category = decodeURIComponent((await params)?.category);
 
   // Filter items by the category
   const filteredItems = allItems.filter((item) => {
@@ -21,7 +21,6 @@ const CategoryPage = async ({ params }: { params: Promise<Params> }) => {
 
   return (
     <div className="p-4">
-      {category}
       {filteredItems.length > 0 ? (
         <section className="container flex flex-col gap-4 md:flex-row md:gap-2">
           <div className="md:1/3 lg:w-1/4">

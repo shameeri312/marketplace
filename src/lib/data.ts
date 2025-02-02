@@ -5,7 +5,7 @@ export const mobiles = [
     brand: 'Apple',
     price: 70000,
     currency: 'PKR',
-    images: ['/iphone.jpg'],
+    image1: '/iphone.jpg',
     specs: {
       screen_size: '6.1 inches',
       battery: '3095 mAh',
@@ -39,7 +39,7 @@ export const mobiles = [
     brand: 'Samsung',
     price: 119900,
     currency: 'PKR',
-    images: ['/samsung.jpeg'],
+    image1: '/samsung.jpeg',
     specs: {
       screen_size: '6.8 inches',
       battery: '5000 mAh',
@@ -73,7 +73,7 @@ export const mobiles = [
     brand: 'Google',
     price: 120000,
     currency: 'PKR',
-    images: ['/google.jpg'],
+    image1: '/google.jpg',
     specs: {
       screen_size: '6.3 inches',
       battery: '4355 mAh',
@@ -107,7 +107,7 @@ export const mobiles = [
     brand: 'OnePlus',
     price: 90000,
     currency: 'PKR',
-    images: ['/onePlus.jpg'],
+    image1: '/onePlus.jpg',
     specs: {
       screen_size: '6.7 inches',
       battery: '5000 mAh',
@@ -137,7 +137,7 @@ export const cars = [
     brand: 'Toyota',
     price: 3500000,
     currency: 'PKR',
-    images: ['/cars/aqua.jpg'],
+    image1: '/cars/aqua.jpg',
     specs: {
       engine: '1.5L',
       fuel_type: 'Hybrid',
@@ -164,7 +164,7 @@ export const cars = [
     brand: 'Toyota',
     price: 5500000,
     currency: 'PKR',
-    images: ['/cars/corolla.jpeg'],
+    image1: '/cars/corolla.jpeg',
     specs: {
       engine: '1.8L',
       fuel_type: 'Petrol',
@@ -191,7 +191,7 @@ export const cars = [
     brand: 'Suzuki',
     price: 2500000,
     currency: 'PKR',
-    images: ['/cars/cultus.jpg'],
+    image1: '/cars/cultus.jpg',
     specs: {
       engine: '1.0L',
       fuel_type: 'Petrol',
@@ -218,7 +218,7 @@ export const cars = [
     brand: 'Toyota',
     price: 4000000,
     currency: 'PKR',
-    images: ['/cars/yaris.jpg'],
+    image1: '/cars/yaris.jpg',
     specs: {
       engine: '1.5L',
       fuel_type: 'Petrol',
@@ -256,7 +256,7 @@ export const property = [
     brand: '',
     price: 25000000,
     currency: 'PKR',
-    images: ['/property/property01.webp'],
+    image1: '/property/property01.webp',
     category: ['property'],
     address: {
       street: '789 Tech Avenue',
@@ -274,7 +274,7 @@ export const property = [
     brand: 'DHA Builders',
     price: 85000000,
     currency: 'PKR',
-    images: ['/property/property02.webp'],
+    image1: '/property/property02.webp',
     category: ['Houses', 'property'],
     address: {
       street: '123 Elite Lane',
@@ -292,7 +292,7 @@ export const property = [
     brand: 'Bahria Developers',
     price: 15000000,
     currency: 'PKR',
-    images: ['/property/property03.webp'],
+    image1: '/property/property03.webp',
     category: ['Houses', 'property'],
     address: {
       street: '456 Bahria Main Boulevard',
@@ -310,7 +310,7 @@ export const property = [
     brand: '',
     price: 40000000,
     currency: 'PKR',
-    images: ['/property/property04.webp'],
+    image1: '/property/property04.webp',
     category: ['property'],
     address: {
       street: '101 Blue Boulevard',
@@ -337,7 +337,7 @@ export const bikes = [
     brand: 'Honda',
     price: 185000,
     currency: 'PKR',
-    images: ['/bikes/bike-1.webp'],
+    image1: '/bikes/bike-1.webp',
     specifications: {
       engine: '125cc',
       mileage: '45 km/l',
@@ -361,7 +361,7 @@ export const bikes = [
     brand: 'Yamaha',
     price: 275000,
     currency: 'PKR',
-    images: ['/bikes/bike-2.jpeg'],
+    image1: '/bikes/bike-2.jpeg',
     specifications: {
       engine: '125cc',
       mileage: '50 km/l',
@@ -385,7 +385,7 @@ export const bikes = [
     brand: 'Suzuki',
     price: 250000,
     currency: 'PKR',
-    images: ['/bikes/bike-3.webp'],
+    image1: '/bikes/bike-3.webp',
     specifications: {
       engine: '150cc',
       mileage: '40 km/l',
@@ -409,7 +409,7 @@ export const bikes = [
     brand: 'Kawasaki',
     price: 1200000,
     currency: 'PKR',
-    images: ['/bikes/bike-4.webp'],
+    image1: '/bikes/bike-4.webp',
     specifications: {
       engine: '399cc',
       mileage: '25 km/l',
@@ -449,7 +449,7 @@ export const jobs = [
     },
     salary: 'PKR 120,000 - 150,000',
     type: 'Full-time',
-    images: [],
+    image1: '',
     description:
       'We are looking for a skilled Software Engineer to join our team and develop scalable web applications.',
     requirements: [
@@ -482,7 +482,7 @@ export const jobs = [
     },
     salary: 'PKR 50,000 - 70,000',
     type: 'Part-time',
-    images: [],
+    image1: '',
     description:
       'Seeking a creative Graphic Designer to produce engaging visual content for our marketing campaigns.',
     requirements: [
@@ -515,7 +515,7 @@ export const jobs = [
     },
     salary: 'PKR 80,000 - 100,000',
     type: 'Contract',
-    images: [],
+    image1: '',
     description:
       'Hiring a Digital Marketing Specialist to manage social media campaigns and analyze performance metrics.',
     requirements: [
@@ -548,7 +548,7 @@ export const jobs = [
     },
     salary: 'PKR 40,000 - 50,000',
     type: 'Full-time',
-    images: [],
+    image1: '',
     description:
       'We need a friendly and detail-oriented Customer Support Representative to assist our clients with their queries.',
     requirements: [

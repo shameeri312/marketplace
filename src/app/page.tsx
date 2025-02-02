@@ -4,6 +4,7 @@ import Cars from '@/components/home/items/cars/Cars';
 import Jobs from '@/components/home/items/jobs/Jobs';
 import MobilePhones from '@/components/home/items/mobilePhones/MobilePhones';
 import Property from '@/components/home/items/property/Property';
+import TopSellers from '@/components/home/topSellers/TopSellers';
 
 export default async function Home() {
   return (
@@ -16,6 +17,8 @@ export default async function Home() {
 
           <section className="padding">
             <div className="container space-y-5">
+              <TopSellers />
+
               <MobilePhones />
 
               <Cars />

@@ -4,16 +4,19 @@ import ProductCard from '@/components/items/productCard/ProductCard';
 import Loading from '@/components/loading/Loading';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
-import { allItems } from '@/lib/data';
+import axios from 'axios';
+import { useSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { FcEmptyTrash } from 'react-icons/fc';
 
 const Items = () => {
   const params = useSearchParams();
+  const [items, setItems] = useState<[] | []>([]);
+  const { data: session }: any = useSession();
   const searchParamQuery = params.get('query') || ''; // Get 'query' from URL params
   const searchCategoryParam = params.get('category') || ''; // Get 'category' from URL params
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     searchCategoryParam ? searchCategoryParam.split(',') : [] // Initialize from query params
   );
@@ -32,18 +35,26 @@ const Items = () => {
   }, [searchParamQuery, searchCategoryParam]);
 
   useEffect(() => {
-    setIsLoading(true);
-    // Simulate filtering process
-    const timeout = setTimeout(() => {
-      // Perform filtering here
-      setIsLoading(false);
-    }, 500); // Adjust this time based on the complexity of filtering
+    const token = session?.user?.token;
+    console.log(token);
 
-    return () => clearTimeout(timeout); // Clean up timeout
+    (async () => {
+      try {
+        const url = `${process.env.API_URL_PREFIX}/api/items/items/`;
+        const res = await axios.get(url);
+        if (res.status === 200) {
+          setItems(res.data);
+          console.log(res.data);
+          setIsLoading(false);
+        }
+      } catch (error: any) {
+        console.log(error);
+      }
+    })();
   }, [searchParamQuery, searchCategoryParam, query]);
 
   // Filter items based on selected categories and query
-  const filteredItems = allItems.filter((item: any) => {
+  const filteredItems = items.filter((item: any) => {
     // Filter by selected categories if any category is selected
     const matchesCategory = selectedCategories.length
       ? selectedCategories.some(
@@ -59,10 +70,14 @@ const Items = () => {
 
     // Search by keywords or other properties
     const matchesQuery = query
-      ? item.keywords.some((keyword: any) =>
-          keyword.toLowerCase().includes(query.toLowerCase())
-        )
+      ? item.keywords
+          .split(',') // Split the comma-separated string into an array
+          .some((keyword: string) =>
+            keyword.trim().toLowerCase().includes(query.toLowerCase())
+          )
       : true;
+
+    console.log(item?.keywords);
 
     return matchesCategory && matchesQuery;
   });

@@ -12,7 +12,7 @@ const ItemsByCategory = ({ items }: { items: any[] }) => {
   const params = useSearchParams();
   const searchParamQuery = params.get('query') || ''; // Get 'query' from URL params
   const searchCategoryParam = params.get('category') || ''; // Get 'category' from URL params
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     searchCategoryParam ? searchCategoryParam.split(',') : [] // Initialize from query params
   );
