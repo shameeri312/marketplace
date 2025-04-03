@@ -7,3 +7,24 @@ export const loginInSchema = z.object({
     message: 'Password must be at least 6 characters.',
   }),
 });
+
+// Define the types based on your Django models
+export type User = {
+  id: string;
+  username: string;
+};
+
+export type Chat = {
+  chat_id: string;
+  chat_name: string;
+  messages?: Message[];
+  is_important?: boolean;
+};
+
+export type Message = {
+  message_id: string;
+  chat_id: string;
+  sender_id: string;
+  body: string;
+  created_at: string;
+};

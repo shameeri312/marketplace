@@ -13,10 +13,7 @@ const Cars = () => {
           Cars
         </Title>
         <div>
-          <Link
-            href="/category/vehicles"
-            className="flex text-xs text-primary sm:text-sm"
-          >
+          <Link href="/items" className="flex text-xs text-primary sm:text-sm">
             View More <ChevronRight className="size-4 sm:size-5" />
           </Link>
         </div>

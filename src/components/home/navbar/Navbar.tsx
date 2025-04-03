@@ -4,7 +4,14 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, LogIn, LogOut, Pencil, Plus } from 'lucide-react';
+import {
+  ChevronDown,
+  LogIn,
+  LogOut,
+  MessageCircle,
+  Pencil,
+  Plus,
+} from 'lucide-react';
 import { FiUserPlus } from 'react-icons/fi';
 import { Sheet, SheetTrigger } from '@/components/ui/sheet';
 import MenuLinks from '@/components/home/navbar/MenuLinks';
@@ -48,7 +55,7 @@ const Navbar = () => {
   }, [params]);
 
   useEffect(() => {
-    if (!isOpen) router.push('/');
+    // if (!isOpen) router.push('/');
     console.log(isOpen);
   }, [isOpen]);
 
@@ -122,6 +129,15 @@ const Navbar = () => {
           >
             {isAuth ? (
               <div className="flex items-center space-x-2">
+                <Link href={'/chat'}>
+                  <Button
+                    size={'icon'}
+                    variant="ghost"
+                    className="[&_svg]:size-5"
+                  >
+                    <MessageCircle className="text-muted-foreground" />
+                  </Button>
+                </Link>
                 <Button
                   variant={'outline'}
                   size={'sm'}

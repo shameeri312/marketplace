@@ -1,11 +1,15 @@
+'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Title } from '@/components/ui/title';
 import { menuLinks } from '@/lib/links';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import React from 'react';
 
 const Footer = () => {
+  const pathname = usePathname();
+  if (pathname.startsWith('/chat')) return null;
   return (
     <>
       <footer className="padding bg-muted/40">

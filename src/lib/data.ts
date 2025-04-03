@@ -1,3 +1,5 @@
+import { Chat } from './definitions';
+
 export const mobiles = [
   {
     id: 1,
@@ -571,3 +573,42 @@ export const jobs = [
 ];
 
 export const allItems = [...mobiles, ...cars, ...property, ...bikes];
+
+export const chats: Chat[] = [
+  {
+    chat_id: 'Alice_101',
+    chat_name: 'Alice',
+    messages: [
+      {
+        message_id: 'msg_1',
+        chat_id: 'Alice_101',
+        sender_id: '1',
+        body: 'Hey, how are you?',
+        created_at: '2023-01-01T12:00:00.000Z',
+      },
+      {
+        message_id: 'msg_2',
+        chat_id: 'Alice_101',
+        sender_id: '2',
+        body: 'I am good, thanks! What about you?',
+        created_at: '2023-01-01T13:30:00.000Z',
+      },
+    ],
+  },
+  { chat_id: 'Bob_102', chat_name: 'Bob' },
+  { chat_id: 'Charlie_103', chat_name: 'Charlie' },
+  { chat_id: 'David_104', chat_name: 'David' },
+  {
+    chat_id: 'Eve_105',
+    chat_name: 'Eve',
+    messages: [
+      {
+        message_id: 'msg_3',
+        chat_id: 'Eve_105',
+        sender_id: '1',
+        body: 'Hey Eve, are you free to talk?',
+        created_at: '2023-01-01T15:00:00.000Z',
+      },
+    ],
+  },
+];
