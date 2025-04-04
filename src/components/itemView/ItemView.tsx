@@ -6,20 +6,24 @@ import React, { useEffect, useState } from 'react';
 import Loading from '../loading/Loading';
 import Image from 'next/image';
 import { Badge } from '../ui/badge';
-import { MapPin, MessageSquareText } from 'lucide-react';
+import { MapPin, MessageSquareText, Pencil } from 'lucide-react';
 import { Text } from '../ui/text';
 import { Separator } from '../ui/separator';
 import { Button } from '../ui/button';
+import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 
 const ItemView = ({ id }: { id: any }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [item, setItem] = useState<any>(null);
+  const { data: session }: any = useSession();
 
   useEffect(() => {
     (async () => {
       try {
         const url = `${process.env.API_URL_PREFIX}/api/items/items/${id}/`;
         const res = await axios.get(url);
+
         if (res.status === 200) {
           setItem(res.data);
           console.log(res.data);
@@ -32,6 +36,8 @@ const ItemView = ({ id }: { id: any }) => {
     })();
   }, [id]);
 
+  if (!session) return <Loading />;
+
   return isLoading ? (
     <Loading /> // Display the loading component when isLoading is true
   ) : (
@@ -41,14 +47,22 @@ const ItemView = ({ id }: { id: any }) => {
           src={`${process.env.API_URL_PREFIX}${item?.image1}`}
           width={300}
           height={300}
-          className="h-[300px] w-full object-contain sm:h-[400px] lg:h-[500px]"
+          className="h-[300px] w-full rounded-xl object-contain sm:h-[400px] lg:h-[500px]"
           alt={item?.ad_title || 'image_preview'}
         />
       </div>
       <div className="flex flex-col items-start gap-3 rounded-xl">
         <div className="flex w-full flex-col items-start gap-3 rounded-xl border p-4">
-          <Badge>{item?.category}</Badge>
-
+          <div className="flex w-full justify-between">
+            <Badge>{item?.category}</Badge>
+            {item.added_by.id === session?.user?.userId && (
+              <Link href={`/edit/${item?.id}`}>
+                <Button size={'sm'} className="h-6 self-end" variant={'link'}>
+                  <Pencil /> Edit
+                </Button>
+              </Link>
+            )}
+          </div>
           <h2 className="text-2xl font-bold capitalize sm:text-3xl lg:text-4xl">
             {item?.ad_title}
           </h2>
@@ -82,6 +96,7 @@ const ItemView = ({ id }: { id: any }) => {
             </p>
           </div>
         </div>
+
         <div className="flex w-full flex-col items-start gap-3 rounded-xl border p-4">
           <h2 className="text-xl font-semibold capitalize">Uploaded by</h2>
           <Separator />
@@ -91,7 +106,7 @@ const ItemView = ({ id }: { id: any }) => {
               alt="user"
               width={100}
               height={100}
-              className="h-12 w-12 rounded-full"
+              className="h-12 w-12 overflow-hidden rounded-full"
             />
 
             <div className="flex w-[calc(100%_-_70px)] items-center justify-between">

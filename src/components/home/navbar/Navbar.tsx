@@ -65,8 +65,6 @@ const Navbar = () => {
     }
   }, [session]);
 
-  console.log(session);
-
   // logout from the session
   const logOut = async () => {
     try {
@@ -84,7 +82,7 @@ const Navbar = () => {
 
   return (
     <header>
-      <div className={'h-auto space-y-2 p-2 md:h-[80px] md:space-y-0'}>
+      <div className={'h-16 space-y-2 p-2 md:h-[80px] md:space-y-0'}>
         <div
           className={
             'flex h-full w-full items-center justify-between gap-2 md:container'
@@ -155,8 +153,8 @@ const Navbar = () => {
                         className="object-cover"
                       />
                       <AvatarFallback>
-                        {session?.user?.firstName[0] +
-                          session?.user?.lastName[0]}
+                        {session?.user?.firstName[0] ?? ''}
+                        {session?.user?.lastName[0] ?? ''}{' '}
                       </AvatarFallback>
                     </Avatar>
                     <ChevronDown />

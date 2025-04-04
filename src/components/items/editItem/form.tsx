@@ -42,7 +42,13 @@ const postAdSchema = z.object({
     .optional(),
 });
 
-const AddItemForm = ({ selectedCategory }: { selectedCategory: string }) => {
+const EditForm = ({
+  item,
+  selectedCategory,
+}: {
+  item: any;
+  selectedCategory: string;
+}) => {
   const [loading, setLoading] = useState<boolean>(false);
   const { data: session }: any = useSession();
   const router = useRouter();
@@ -52,22 +58,35 @@ const AddItemForm = ({ selectedCategory }: { selectedCategory: string }) => {
   const form = useForm<z.infer<typeof postAdSchema>>({
     resolver: zodResolver(postAdSchema),
     defaultValues: {
-      adTitle: '',
-      description: '',
-      currency: 'PKR',
-      street: '',
-      city: '',
-      state: '',
-      postalCode: '',
-      price: '',
-      name: '',
-      phoneNumber: '',
-      selectedCategory: selectedCategory,
-      keywords: '',
-      images: [],
+      adTitle: item?.ad_title ?? '',
+      description: item?.description ?? '',
+      street: item?.street ?? '',
+      currency: item?.currency ?? '',
+      city: item?.city ?? '',
+      state: item?.state ?? '',
+      postalCode: item?.postal_code ?? '',
+      price: item?.price ?? '',
+      name: item?.name ?? '',
+      phoneNumber: item?.phone_number ?? '',
+      selectedCategory: item?.category,
+      keywords: item?.keywords ?? '',
     },
     mode: 'onChange',
   });
+
+  useEffect(() => {
+    // On initial render, show existing image URLs if present
+    const existingImages = [];
+
+    if (item?.image1)
+      existingImages.push(`${process.env.API_URL_PREFIX}${item.image1}`);
+    if (item?.image2)
+      existingImages.push(`${process.env.API_URL_PREFIX}${item.image2}`);
+    if (item?.image3)
+      existingImages.push(`${process.env.API_URL_PREFIX}${item.image3}`);
+
+    setImagePreviews(existingImages);
+  }, [item]);
 
   useEffect(() => {
     form.setValue('selectedCategory', selectedCategory);
@@ -105,23 +124,21 @@ const AddItemForm = ({ selectedCategory }: { selectedCategory: string }) => {
     formData.append('keywords', values.keywords || '');
     formData.append('category', values.selectedCategory);
 
-    console.log(formData);
-
     values.images?.forEach((image, index) => {
       formData.append(`image${index + 1}`, image);
     });
 
     try {
-      const url = `${process.env.API_URL_PREFIX}/api/items/items/`;
-      const res = await axios.post(url, formData, {
+      const url = `${process.env.API_URL_PREFIX}/api/items/items/${item.id}/`;
+      const res = await axios.patch(url, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (res.status === 201) {
-        toast.success('Ad posted successfully!');
+      if (res.status === 200) {
+        toast.success('Ad updated successfully!');
         router.push('/explore');
       }
     } catch (error: any) {
@@ -345,11 +362,11 @@ const AddItemForm = ({ selectedCategory }: { selectedCategory: string }) => {
           )}
         />
         <Button disabled={loading} type="submit">
-          {loading ? 'Submitting...' : 'Post Now'}
+          {loading ? 'Submitting...' : 'Update Ad'}
         </Button>
       </form>
     </Form>
   );
 };
 
-export default AddItemForm;
+export default EditForm;

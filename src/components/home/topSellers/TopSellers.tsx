@@ -20,7 +20,7 @@ const TopSellers = () => {
 
     (async () => {
       try {
-        const url = `${process.env.API_URL_PREFIX}api/items/items/`;
+        const url = `${process.env.API_URL_PREFIX}/api/items/items/`;
         const res = await axios.get(url);
         if (res.status === 200) {
           setItems(res.data);

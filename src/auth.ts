@@ -26,6 +26,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const password = credentials?.password as string | undefined;
 
         const url = `${process.env.API_URL_PREFIX}/api/token/`; // this will get token to stay logged in and authorized
+        console.log('API URL Prefix:', process.env.API_URL_PREFIX);
+        console.log('Token URL:', `${process.env.API_URL_PREFIX}/api/token/`);
+
+        console.log(
+          'Profile URL:',
+          `${process.env.API_URL_PREFIX}/api/user/profile/`
+        );
 
         const res = await fetch(url, {
           method: 'POST',
@@ -57,7 +64,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           const profile = await profile_res.json();
 
-          console.log(profile);
+          console.log(profile_res);
 
           // return null;
           return Promise.resolve({
@@ -67,6 +74,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             firstName: profile?.first_name || '',
             lastName: profile?.last_name || '',
             image: profile?.photo,
+            userId: profile?.id,
           });
         } else {
           const errorData = await res.json();

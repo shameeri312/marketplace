@@ -576,36 +576,45 @@ export const allItems = [...mobiles, ...cars, ...property, ...bikes];
 
 export const chats: Chat[] = [
   {
-    chat_id: 'Alice_101',
+    chat_id: '550e8400-e29b-41d4-a716-446655440000', // Replaced '101'
     chat_name: 'Alice',
     messages: [
       {
-        message_id: 'msg_1',
-        chat_id: 'Alice_101',
-        sender_id: '1',
+        message_id: '6ba7b810-9dad-11d1-80b4-00c04fd430c8', // Replaced 'msg_1'
+        chat_id: '550e8400-e29b-41d4-a716-446655440000',
+        sender_id: '123e4567-e89b-12d3-a456-426614174000', // Replaced '1'
         body: 'Hey, how are you?',
         created_at: '2023-01-01T12:00:00.000Z',
       },
       {
-        message_id: 'msg_2',
-        chat_id: 'Alice_101',
-        sender_id: '2',
+        message_id: '6ba7b811-9dad-11d1-80b4-00c04fd430c9', // Replaced 'msg_2'
+        chat_id: '550e8400-e29b-41d4-a716-446655440000',
+        sender_id: '987fcde0-12ab-34cd-56ef-123456789000', // Replaced '2'
         body: 'I am good, thanks! What about you?',
         created_at: '2023-01-01T13:30:00.000Z',
       },
     ],
   },
-  { chat_id: 'Bob_102', chat_name: 'Bob' },
-  { chat_id: 'Charlie_103', chat_name: 'Charlie' },
-  { chat_id: 'David_104', chat_name: 'David' },
   {
-    chat_id: 'Eve_105',
+    chat_id: 'e8f4d2a0-7b9c-4f5e-8d3a-1b2c3d4e5f6a', // Replaced '102'
+    chat_name: 'Bob',
+  },
+  {
+    chat_id: 'f47ac10b-58cc-4372-a567-0e02b2c3d479', // Replaced '103'
+    chat_name: 'Charlie',
+  },
+  {
+    chat_id: 'c9b8d7e6-5f4a-3b29-1d8c-7e6f5a4b3c2d', // Replaced '104'
+    chat_name: 'David',
+  },
+  {
+    chat_id: 'd4e3f2c1-b0a9-8765-4321-fedcba987654', // Replaced '105'
     chat_name: 'Eve',
     messages: [
       {
-        message_id: 'msg_3',
-        chat_id: 'Eve_105',
-        sender_id: '1',
+        message_id: '6ba7b812-9dad-11d1-80b4-00c04fd430ca', // Replaced 'msg_3'
+        chat_id: 'd4e3f2c1-b0a9-8765-4321-fedcba987654',
+        sender_id: '123e4567-e89b-12d3-a456-426614174000', // Same sender as Alice's '1'
         body: 'Hey Eve, are you free to talk?',
         created_at: '2023-01-01T15:00:00.000Z',
       },

@@ -13,6 +13,7 @@ const ProductCard = ({ content }: { content: any }) => {
   const [url, setUrl] = useState<string>('');
 
   const image = content?.image1.split('/');
+  console.log(content);
 
   useEffect(() => {
     if (image.includes('media')) {

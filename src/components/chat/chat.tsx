@@ -10,7 +10,7 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-
+import { motion } from 'framer-motion'; // Reintroduce for smooth animations
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
@@ -18,6 +18,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { chats } from '@/lib/data';
 import Link from 'next/link';
+import useChatColorStore from '@/zustand/colors/store';
 
 const formSchema = z.object({
   message: z.string().min(1),
@@ -30,6 +31,7 @@ interface ChatMessage {
   time: string;
   image?: string;
   link?: string;
+  message_id?: string; // Add message_id for uniqueness
 }
 
 const oldMessages: ChatMessage[] = [
@@ -45,134 +47,15 @@ const oldMessages: ChatMessage[] = [
     message: "I'm good! How about you?",
     time: '10:01 AM',
   },
-  {
-    sender: 'user',
-    type: 'message',
-    message: 'Doing great! What can you do?',
-    time: '10:02 AM',
-  },
-  {
-    sender: 'bot',
-    type: 'message',
-    message: 'I can chat with you, answer questions, and more!',
-    time: '10:03 AM',
-  },
-  {
-    sender: 'user',
-    type: 'message',
-    message: "That's cool! Tell me a joke.",
-    time: '10:04 AM',
-  },
-  {
-    sender: 'bot',
-    type: 'message',
-    message:
-      "Sure! Why don't skeletons fight each other? Because they don't have the guts!",
-    time: '10:05 AM',
-  },
-  {
-    sender: 'user',
-    type: 'message',
-    message: "Haha! That's funny.",
-    time: '10:06 AM',
-  },
-  {
-    sender: 'bot',
-    type: 'message',
-    message: 'Glad you liked it! Need help with anything?',
-    time: '10:07 AM',
-  },
-  {
-    sender: 'user',
-    type: 'message',
-    message: 'Yes, how do I learn JavaScript?',
-    time: '10:08 AM',
-  },
-  {
-    sender: 'bot',
-    type: 'message',
-    message:
-      'Start with the basics like variables, functions, and loops. Then practice!',
-    time: '10:09 AM',
-  },
-  {
-    sender: 'user',
-    type: 'message',
-    message: 'Got it! Can you suggest a project?',
-    time: '10:10 AM',
-  },
-  {
-    sender: 'bot',
-    type: 'message',
-    message:
-      'How about building a to-do list app? It covers important concepts!',
-    time: '10:11 AM',
-  },
-  {
-    sender: 'user',
-    type: 'message',
-    message: 'That sounds good. Any tips?',
-    time: '10:12 AM',
-  },
-  {
-    sender: 'bot',
-    type: 'message',
-    message: 'Break the project into small tasks and practice regularly.',
-    time: '10:13 AM',
-  },
-  {
-    sender: 'user',
-    type: 'message',
-    message: 'Thanks for the advice!',
-    time: '10:14 AM',
-  },
-  {
-    sender: 'bot',
-    type: 'message',
-    message: "You're welcome! Happy coding!",
-    time: '10:15 AM',
-  },
-  {
-    sender: 'user',
-    type: 'message',
-    message: 'How do I use an API?',
-    time: '10:16 AM',
-  },
-  {
-    sender: 'bot',
-    type: 'message',
-    message: 'Use fetch() in JavaScript to call APIs and handle responses.',
-    time: '10:17 AM',
-  },
-  {
-    sender: 'user',
-    type: 'message',
-    message: 'Got it! Can I use async/await?',
-    time: '10:18 AM',
-  },
-  {
-    sender: 'bot',
-    type: 'message',
-    message: 'Yes! async/await makes handling asynchronous code easier.',
-    time: '10:19 AM',
-  },
-  {
-    sender: 'user',
-    type: 'message',
-    message: "You're really helpful!",
-    time: '10:20 AM',
-  },
-  {
-    sender: 'bot',
-    type: 'message',
-    message: "I'm happy to help! Anything else?",
-    time: '10:21 AM',
-  },
+  // ... (rest of your messages)
 ];
 
 const Chat = ({ id }: { id: string }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatName, setChatName] = useState<string>('');
+  const { chatColor } = useChatColorStore();
+  const [ws, setWs] = useState<WebSocket | null>(null); // WebSocket state
+  // const [uuid] = useState<string | null>(localStorage.getItem('uuid')); // User ID from localStorage
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -181,29 +64,87 @@ const Chat = ({ id }: { id: string }) => {
   const chatRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Initial messages
     setMessages(oldMessages);
 
+    // Fetch chat name
     const fetchChatName = async () => {
-      chats.forEach((chat) => {
-        if (chat.chat_id === id) {
-          setChatName(chat.chat_name);
-        }
-      });
+      setChatName('OK');
     };
 
     fetchChatName();
+
+    // WebSocket setup
+    if (id) {
+      const socket = new WebSocket(
+        `ws://192.168.100.17:8008/ws/chat/${id}/?user_id=88` // Updated to match your Daphne server
+      );
+
+      socket.onopen = () => {
+        console.log('WebSocket connection established');
+        setWs(socket);
+      };
+
+      socket.onerror = (event) => {
+        console.error('WebSocket connection error', event);
+        toast.error('Failed to connect to chat server.');
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+
+          if (data.room) {
+            // Handle room ID if needed (optional)
+            console.log('Room ID received:', data.room);
+          } else {
+            setMessages((prevMessages) => {
+              const isDuplicate = prevMessages.some(
+                (msg) => msg.message_id === data.message_id
+              );
+
+              if (!isDuplicate && data.message) {
+                return [
+                  {
+                    ...data,
+                    time: new Date().toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    }),
+                  },
+                  ...prevMessages,
+                ];
+              }
+
+              return prevMessages;
+            });
+          }
+        } catch (error) {
+          console.error('Error parsing message', error);
+        }
+      };
+
+      // Cleanup
+      return () => {
+        console.log('Closing WebSocket connection');
+        socket.close();
+      };
+    }
   }, [id]);
 
   useEffect(() => {
-    chatRef.current?.scrollTo({
-      top: chatRef.current.scrollHeight,
-      behavior: 'smooth',
-    });
+    if (chatRef.current) {
+      chatRef.current.scrollTo({
+        top: chatRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
   }, [messages]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const newMessage = values.message;
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !ws) return;
+
     try {
       const messageObject: ChatMessage = {
         sender: 'user',
@@ -214,10 +155,16 @@ const Chat = ({ id }: { id: string }) => {
         }),
         type: 'message',
       };
+
+      // Send message via WebSocket
+      ws.send(JSON.stringify({ body: newMessage }));
+
+      // Optimistically update UI
+      setMessages((prevMessages) => [messageObject, ...prevMessages]);
+
       form.reset({
         message: '',
       });
-      setMessages((prevMessages) => [...prevMessages, messageObject]);
     } catch (error) {
       console.error('Form submission error', error);
       toast.error('Failed to send the message.');
@@ -225,6 +172,7 @@ const Chat = ({ id }: { id: string }) => {
   }
 
   if (!chatName) return null;
+
   return (
     <div className="flex h-full w-full flex-col justify-between">
       {/* Header */}
@@ -239,7 +187,14 @@ const Chat = ({ id }: { id: string }) => {
               <X />
             </Button>
           </Link>
-          <User className="size-9 rounded-full bg-neutral-700 p-1 text-white" />
+          <User
+            style={{
+              color: chatColor,
+              background: chatColor + '1d',
+              borderColor: chatColor,
+            }}
+            className="size-12 rounded-full border p-2 text-white"
+          />
           <h2 className="text-lg font-medium">{chatName}</h2>
         </div>
 
@@ -259,38 +214,56 @@ const Chat = ({ id }: { id: string }) => {
         ref={chatRef}
         className="flex flex-1 flex-col space-y-4 overflow-y-auto p-4"
       >
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-xs rounded-lg p-3 ${msg.sender === 'user' ? 'bg-primary text-white' : 'bg-primary/30 text-black'}`}
+        <>
+          {messages.map((msg, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              {msg.type === 'message' && <p>{msg.message}</p>}
-              {msg.type === 'image' && msg.image && (
-                <img
-                  src={msg.image}
-                  alt="Sent media"
-                  className="w-full rounded-lg"
-                />
-              )}
-              {msg.type === 'link' && msg.link && (
-                <a
-                  href={msg.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-300 underline"
+              <div>
+                <p
+                  className={`flex font-semibold ${msg.sender === 'user' ? 'justify-end pr-2' : 'justify-start pl-2'}`}
                 >
-                  {msg.message}
-                </a>
-              )}
-              <span className="mt-1 block text-xs text-gray-300">
-                {msg.time}
-              </span>
-            </div>
-          </div>
-        ))}
+                  {msg.sender === 'user' ? 'You' : chatName}
+                </p>
+                <div
+                  className={`max-w-xs ${msg.sender === 'user' ? '' : 'bg-neutral-200'} rounded-md p-2 md:rounded-lg lg:p-3`}
+                  style={{
+                    background: msg.sender === 'user' ? chatColor : '',
+                  }}
+                >
+                  {msg.type === 'message' && (
+                    <p className="text-sm md:text-base">{msg.message}</p>
+                  )}
+                  {msg.type === 'image' && msg.image && (
+                    <img
+                      src={msg.image}
+                      alt="Sent media"
+                      className="w-full rounded-lg"
+                    />
+                  )}
+                  {msg.type === 'link' && msg.link && (
+                    <a
+                      href={msg.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-300 underline"
+                    >
+                      {msg.message}
+                    </a>
+                  )}
+                  <span className="mt-1 block w-max text-xs text-neutral-700">
+                    {msg.time}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </>
       </div>
 
       {/* Footer */}
@@ -325,6 +298,7 @@ const Chat = ({ id }: { id: string }) => {
             <Button
               size={'icon'}
               className="size-10 rounded-full"
+              style={{ background: chatColor }}
               variant={'default'}
             >
               <Send />
