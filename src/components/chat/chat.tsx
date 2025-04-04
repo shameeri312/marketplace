@@ -91,6 +91,8 @@ const Chat = ({ id }: { id: string }) => {
       };
 
       socket.onmessage = (event) => {
+        console.log('Message received:', event.data);
+
         try {
           const data = JSON.parse(event.data);
 
