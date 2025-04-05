@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
-import React, { useState } from 'react';
-import { chats } from '@/lib/data';
+import React, { useEffect, useState } from 'react';
 import { Chat } from '@/lib/definitions';
 import { User } from 'lucide-react';
 import { Badge } from '../ui/badge';
@@ -12,6 +12,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
+import { useSession } from 'next-auth/react';
+import axios from 'axios';
+import Loading from '../loading/Loading';
 
 const buttons = ['All', 'Unread', 'Important'];
 const colorNames = ['red', 'green', 'blue', 'orange', 'yellow'];
@@ -19,21 +22,44 @@ const colorNames = ['red', 'green', 'blue', 'orange', 'yellow'];
 const ChatSidebar = () => {
   const { chatColor, setChatColor, colorOptions } = useChatColorStore();
   const [filter, setFilter] = useState<string>('All');
+  const [chats, setChats] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const { data: session }: any = useSession();
   const router = useRouter();
 
-  // Sorting chats: Chats with messages come first
-  const sortedChats = [...chats].sort((a, b) => {
-    const aHasMessages = a.messages && a.messages.length > 0;
-    const bHasMessages = b.messages && b.messages.length > 0;
-    return Number(bHasMessages) - Number(aHasMessages);
-  });
+  const getChats = async () => {
+    const token = session?.user?.token;
 
-  // Filtering chats based on the selected filter
-  const filteredChats = sortedChats.filter((chat) => {
-    if (filter === 'Unread') return chat.messages?.length ?? 0 > 0;
-    if (filter === 'Important') return chat.is_important; // Assuming chat has `isImportant`
-    return true; // 'All' case
-  });
+    if (token) {
+      try {
+        const res = await axios.get(
+          `${process.env.API_URL_PREFIX}/chat/chats/`,
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (res.status === 200) {
+          setChats(res.data);
+        }
+        return [];
+      } catch (error) {
+        console.error('Error fetching chats:', error);
+        return [];
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    getChats();
+  }, [session?.user]);
+
+  if (loading) return <Loading />;
 
   return (
     <div className="flex h-full flex-col md:w-[300px] md:border-r md:border-neutral-400 lg:w-[350px]">
@@ -97,8 +123,8 @@ const ChatSidebar = () => {
       {/* Chat List */}
       <div className="flex-1 overflow-y-auto">
         <ul className="flex flex-col">
-          {filteredChats.length > 0 ? (
-            filteredChats.map((chat: Chat, index: number) => {
+          {chats.length > 0 ? (
+            chats.map((chat: Chat, index: number) => {
               const messages = chat.messages ?? [];
 
               return (
