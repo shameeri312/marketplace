@@ -13,11 +13,11 @@ const useChatColorStore = create<ColorState>()(
   devtools(
     persist(
       (set) => ({
-        chatColor: '#ff0000', // Darker bright red as default
+        chatColor: '#c1121f', // Darker bright red as default
 
         setChatColor: (color: string) => set({ chatColor: color }),
 
-        colorOptions: ['#ff0000', '#2ECC71', '#3498DB', '#ff6700', '#F1C40F'],
+        colorOptions: ['#c1121f', '#086c19', '#00509d', '#f95738', '#f7b538'],
       }),
       {
         name: 'chat-color-storage', // Name of the item in localStorage

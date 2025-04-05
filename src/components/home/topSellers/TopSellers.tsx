@@ -5,19 +5,14 @@ import { ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import CardsWrapper from '@/components/items/cardsWrapper/CardsWrapper';
-import { useSession } from 'next-auth/react';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
 
 const TopSellers = () => {
   const [items, setItems] = useState<[] | []>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const { data: session }: any = useSession();
 
   useEffect(() => {
-    const token = session?.user?.token;
-    console.log(token);
-
     (async () => {
       try {
         const url = `${process.env.API_URL_PREFIX}/api/items/items/`;

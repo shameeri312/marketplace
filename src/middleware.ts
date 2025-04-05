@@ -18,5 +18,5 @@ export async function middleware(request: NextRequest) {
 
 // See "Matching Paths" below to learn more
 export const config = {
-  matcher: ['/chat', '/post'],
+  matcher: ['/chat', '/chat/:id', '/post'],
 };

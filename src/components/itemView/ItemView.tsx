@@ -120,10 +120,23 @@ const ItemView = ({ id }: { id: any }) => {
                 </button>
               </div>
 
-              <Button variant={'default'} size={'sm'}>
-                <MessageSquareText />
-                Chat
-              </Button>
+              <Link href={`/chat/12-1`}>
+                <Button
+                  variant={'default'}
+                  onClick={() => {
+                    localStorage.setItem(
+                      'chat_name',
+                      item?.added_by?.first_name +
+                        ' ' +
+                        item?.added_by?.last_name
+                    );
+                  }}
+                  size={'sm'}
+                >
+                  <MessageSquareText />
+                  Chat
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
