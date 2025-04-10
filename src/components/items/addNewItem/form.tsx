@@ -35,11 +35,7 @@ const postAdSchema = z.object({
   phoneNumber: z.string().regex(/^\+?\d{10,15}$/, 'Enter a valid phone number'),
   selectedCategory: z.string().nonempty('Category is required'),
   keywords: z.string().optional(),
-  images: z
-    .array(z.instanceof(File))
-    .min(1, 'At least one image is required')
-    .max(3, 'You can upload up to 3 images')
-    .optional(),
+  images: z.array(z.instanceof(File)).optional(),
 });
 
 const AddItemForm = ({ selectedCategory }: { selectedCategory: string }) => {
@@ -48,6 +44,8 @@ const AddItemForm = ({ selectedCategory }: { selectedCategory: string }) => {
   const router = useRouter();
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
+
+  console.log(selectedCategory);
 
   const form = useForm<z.infer<typeof postAdSchema>>({
     resolver: zodResolver(postAdSchema),
@@ -71,48 +69,49 @@ const AddItemForm = ({ selectedCategory }: { selectedCategory: string }) => {
 
   useEffect(() => {
     form.setValue('selectedCategory', selectedCategory);
-  }, [selectedCategory]);
+  }, [form, selectedCategory]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []).slice(0, 3);
+    const files = Array.from(e.target.files || []).slice(0, 3); // Limit to 3 images
     setSelectedImages(files);
     setImagePreviews(files.map((file) => URL.createObjectURL(file)));
-    form.setValue('images', files);
+    form.setValue('images', files); // Update form state with selected files
   };
 
   const removeImage = (index: number) => {
     const updatedImages = selectedImages.filter((_, i) => i !== index);
     setSelectedImages(updatedImages);
     setImagePreviews(updatedImages.map((file) => URL.createObjectURL(file)));
-    form.setValue('images', updatedImages);
+    form.setValue('images', updatedImages); // Update form state
   };
 
   async function onSubmit(values: z.infer<typeof postAdSchema>) {
     setLoading(true);
     const token = session?.user?.token;
 
+    // Create FormData to send files and other fields
     const formData = new FormData();
-    formData.append('ad_title', values.adTitle);
+    formData.append('adTitle', values.adTitle);
     formData.append('description', values.description);
     formData.append('street', values.street);
     formData.append('currency', values.currency || 'PKR');
     formData.append('city', values.city);
     formData.append('state', values.state);
-    formData.append('postal_code', values.postalCode);
+    formData.append('postalCode', values.postalCode);
     formData.append('price', values.price);
     formData.append('name', values.name);
-    formData.append('phone_number', values.phoneNumber);
-    formData.append('keywords', values.keywords || '');
+    formData.append('phoneNumber', values.phoneNumber);
     formData.append('category', values.selectedCategory);
-
-    console.log(formData);
-
+    formData.append('keywords', values.keywords || '');
+    // Append images
     values.images?.forEach((image, index) => {
-      formData.append(`image${index + 1}`, image);
+      if (image) formData.append(`image${index + 1}`, image);
     });
 
+    console.log('FormData:', Object.fromEntries(formData)); // Log for debugging (note: files won't be fully visible)
+
     try {
-      const url = `${process.env.API_URL_PREFIX}/api/items/items/`;
+      const url = `/api/items/`;
       const res = await axios.post(url, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -125,10 +124,13 @@ const AddItemForm = ({ selectedCategory }: { selectedCategory: string }) => {
         router.push('/explore');
       }
     } catch (error: any) {
-      console.log(error);
-      toast.error('Failed to post ad');
+      console.log('Error:', error);
+      toast.error(
+        'Failed to post ad: ' + (error.response?.data?.error || error.message)
+      );
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (
@@ -185,7 +187,6 @@ const AddItemForm = ({ selectedCategory }: { selectedCategory: string }) => {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="price"
@@ -225,7 +226,6 @@ const AddItemForm = ({ selectedCategory }: { selectedCategory: string }) => {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="phoneNumber"
@@ -239,7 +239,6 @@ const AddItemForm = ({ selectedCategory }: { selectedCategory: string }) => {
             </FormItem>
           )}
         />
-        {/* -------------------------- */}
         <FormField
           control={form.control}
           name="street"
@@ -253,7 +252,6 @@ const AddItemForm = ({ selectedCategory }: { selectedCategory: string }) => {
             </FormItem>
           )}
         />
-        {/* ------------------------- */}
         <FormField
           control={form.control}
           name="city"
@@ -267,8 +265,6 @@ const AddItemForm = ({ selectedCategory }: { selectedCategory: string }) => {
             </FormItem>
           )}
         />
-
-        {/* ---------------------------- */}
         <FormField
           control={form.control}
           name="state"
@@ -282,7 +278,6 @@ const AddItemForm = ({ selectedCategory }: { selectedCategory: string }) => {
             </FormItem>
           )}
         />
-        {/* ------------------------------------- */}
         <FormField
           control={form.control}
           name="postalCode"
@@ -296,7 +291,6 @@ const AddItemForm = ({ selectedCategory }: { selectedCategory: string }) => {
             </FormItem>
           )}
         />
-        {/* ----------------------------------------------- */}
         {/* Image Upload */}
         <FormField
           control={form.control}

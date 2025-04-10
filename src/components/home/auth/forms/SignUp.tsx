@@ -71,14 +71,14 @@ const SignUp = () => {
     setLoading(true);
 
     const credentials = {
-      first_name: values.firstname,
-      last_name: values.lastname,
+      firstName: values.firstname,
+      lastName: values.lastname,
       email: values.email,
       password: values.password,
       password2: values.password2,
     };
 
-    const url = `${process.env.API_URL_PREFIX}/api/user/sign-up/`; // URL to get the token
+    const url = `/api/signup/`; // URL to get the token
 
     try {
       const res = await axios.post(url, credentials, {
@@ -87,7 +87,7 @@ const SignUp = () => {
         },
       });
 
-      if (res.status === 200) {
+      if (res.status === 201) {
         if (res.data.created) {
           toast.success('Sign up successfull!');
           router.push(pathname + '?' + createQueryString('auth', 'sign-in'));
@@ -99,15 +99,13 @@ const SignUp = () => {
       }
       // Handle the response
     } catch (error: any) {
-      toast.error('Sign up failed!');
+      toast.error(error.response.data.message);
 
       // Handle errors
-      console.error(
-        'Error:',
-        error.response ? error.response.data : error.message
-      );
+      console.error('Error:', error.response.data.message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (

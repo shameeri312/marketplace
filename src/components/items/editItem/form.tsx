@@ -37,9 +37,8 @@ const postAdSchema = z.object({
   keywords: z.string().optional(),
   images: z
     .array(z.instanceof(File))
-    .min(1, 'At least one image is required')
     .max(3, 'You can upload up to 3 images')
-    .optional(),
+    .optional(), // Removed min(1) to allow clearing
 });
 
 const EditForm = ({
@@ -58,52 +57,66 @@ const EditForm = ({
   const form = useForm<z.infer<typeof postAdSchema>>({
     resolver: zodResolver(postAdSchema),
     defaultValues: {
-      adTitle: item?.ad_title ?? '',
+      adTitle: item?.adTitle ?? '',
       description: item?.description ?? '',
       street: item?.street ?? '',
-      currency: item?.currency ?? '',
+      currency: item?.currency ?? 'PKR',
       city: item?.city ?? '',
       state: item?.state ?? '',
-      postalCode: item?.postal_code ?? '',
-      price: item?.price ?? '',
+      postalCode: item?.postalCode ?? '',
+      price: String(item?.price ?? ''),
       name: item?.name ?? '',
-      phoneNumber: item?.phone_number ?? '',
-      selectedCategory: item?.category,
+      phoneNumber: item?.phoneNumber ?? '',
+      selectedCategory: item?.category ?? selectedCategory,
       keywords: item?.keywords ?? '',
+      images: [], // Initialize as empty array
     },
     mode: 'onChange',
   });
 
   useEffect(() => {
-    // On initial render, show existing image URLs if present
+    // Set initial form values based on item
+    form.reset({
+      adTitle: item?.adTitle ?? '',
+      description: item?.description ?? '',
+      street: item?.street ?? '',
+      currency: item?.currency ?? 'PKR',
+      city: item?.city ?? '',
+      state: item?.state ?? '',
+      postalCode: item?.postalCode ?? '',
+      price: String(item?.price ?? ''),
+      name: item?.name ?? '',
+      phoneNumber: item?.phoneNumber ?? '',
+      selectedCategory: item?.category ?? selectedCategory,
+      keywords: item?.keywords ?? '',
+      images: [], // Reset images to empty
+    });
+
+    // Set initial image previews from existing image URLs
     const existingImages = [];
-
-    if (item?.image1)
-      existingImages.push(`${process.env.API_URL_PREFIX}${item.image1}`);
-    if (item?.image2)
-      existingImages.push(`${process.env.API_URL_PREFIX}${item.image2}`);
-    if (item?.image3)
-      existingImages.push(`${process.env.API_URL_PREFIX}${item.image3}`);
-
+    if (item?.image1) existingImages.push(item.image1);
+    if (item?.image2) existingImages.push(item.image2);
+    if (item?.image3) existingImages.push(item.image3);
     setImagePreviews(existingImages);
-  }, [item]);
-
-  useEffect(() => {
-    form.setValue('selectedCategory', selectedCategory);
-  }, [selectedCategory]);
+  }, [item, selectedCategory]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []).slice(0, 3);
+    const files = Array.from(e.target.files || []).slice(0, 3); // Limit to 3 images
     setSelectedImages(files);
-    setImagePreviews(files.map((file) => URL.createObjectURL(file)));
-    form.setValue('images', files);
+    setImagePreviews(files.map((file) => URL.createObjectURL(file))); // Update previews with new files
+    form.setValue('images', files); // Update form state with new files
   };
 
   const removeImage = (index: number) => {
     const updatedImages = selectedImages.filter((_, i) => i !== index);
     setSelectedImages(updatedImages);
-    setImagePreviews(updatedImages.map((file) => URL.createObjectURL(file)));
-    form.setValue('images', updatedImages);
+    // If no new images are selected after removal, clear previews to indicate intent to remove
+    const newPreviews =
+      updatedImages.length > 0
+        ? updatedImages.map((file) => URL.createObjectURL(file))
+        : imagePreviews.filter((_, i) => i !== index); // Retain existing URLs until submission
+    setImagePreviews(newPreviews);
+    form.setValue('images', updatedImages); // Update form state
   };
 
   async function onSubmit(values: z.infer<typeof postAdSchema>) {
@@ -111,25 +124,31 @@ const EditForm = ({
     const token = session?.user?.token;
 
     const formData = new FormData();
-    formData.append('ad_title', values.adTitle);
+    formData.append('adTitle', values.adTitle);
     formData.append('description', values.description);
     formData.append('street', values.street);
     formData.append('currency', values.currency || 'PKR');
     formData.append('city', values.city);
     formData.append('state', values.state);
-    formData.append('postal_code', values.postalCode);
+    formData.append('postalCode', values.postalCode);
     formData.append('price', values.price);
     formData.append('name', values.name);
-    formData.append('phone_number', values.phoneNumber);
+    formData.append('phoneNumber', values.phoneNumber);
     formData.append('keywords', values.keywords || '');
     formData.append('category', values.selectedCategory);
 
+    // Append new images
     values.images?.forEach((image, index) => {
       formData.append(`image${index + 1}`, image);
     });
 
+    // Indicate intent to clear images if no new images are selected after removal
+    if (values.images?.length === 0 && imagePreviews.length > 0) {
+      formData.append('clearImages', 'true'); // Signal to server to clear existing images
+    }
+
     try {
-      const url = `${process.env.API_URL_PREFIX}/api/items/items/${item.id}/`;
+      const url = `/api/items/${item._id}/`;
       const res = await axios.patch(url, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -143,9 +162,12 @@ const EditForm = ({
       }
     } catch (error: any) {
       console.log(error);
-      toast.error('Failed to post ad');
+      toast.error(
+        'Failed to update ad: ' + (error.response?.data?.error || error.message)
+      );
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (
@@ -202,7 +224,6 @@ const EditForm = ({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="price"
@@ -242,7 +263,6 @@ const EditForm = ({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
           name="phoneNumber"
@@ -256,7 +276,6 @@ const EditForm = ({
             </FormItem>
           )}
         />
-        {/* -------------------------- */}
         <FormField
           control={form.control}
           name="street"
@@ -270,7 +289,6 @@ const EditForm = ({
             </FormItem>
           )}
         />
-        {/* ------------------------- */}
         <FormField
           control={form.control}
           name="city"
@@ -284,8 +302,6 @@ const EditForm = ({
             </FormItem>
           )}
         />
-
-        {/* ---------------------------- */}
         <FormField
           control={form.control}
           name="state"
@@ -299,7 +315,6 @@ const EditForm = ({
             </FormItem>
           )}
         />
-        {/* ------------------------------------- */}
         <FormField
           control={form.control}
           name="postalCode"
@@ -313,7 +328,6 @@ const EditForm = ({
             </FormItem>
           )}
         />
-        {/* ----------------------------------------------- */}
         {/* Image Upload */}
         <FormField
           control={form.control}

@@ -19,7 +19,7 @@ const EditItem = ({ id }: { id: number }) => {
   useEffect(() => {
     (async () => {
       try {
-        const url = `${process.env.API_URL_PREFIX}/api/items/items/${id}/`;
+        const url = `/api/items/${id}/`;
         const res = await axios.get(url);
 
         if (res.status === 200) {

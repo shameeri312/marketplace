@@ -12,72 +12,55 @@ import { FcEmptyTrash } from 'react-icons/fc';
 
 const Items = () => {
   const params = useSearchParams();
-  const [items, setItems] = useState<[] | []>([]);
+  const [items, setItems] = useState<any[]>([]);
   const { data: session }: any = useSession();
-  const searchParamQuery = params.get('query') || ''; // Get 'query' from URL params
-  const searchCategoryParam = params.get('category') || ''; // Get 'category' from URL params
+  const searchParamQuery = params.get('query') || '';
+  const searchCategoryParam = params.get('category') || '';
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    searchCategoryParam ? searchCategoryParam.split(',') : [] // Initialize from query params
-  );
-  const [query, setQuery] = useState<string>(searchParamQuery); // Initialize query with URL param
-  const [visibleItems, setVisibleItems] = useState<number>(9); // For "Load More" functionality
+  const [visibleItems, setVisibleItems] = useState<number>(9);
 
-  useEffect(() => {
-    // Update query and selected categories whenever URL params change
-    setQuery(searchParamQuery);
-    setSelectedCategories(
-      searchCategoryParam ? searchCategoryParam.split(',') : []
-    );
-    if (query) {
-      setSelectedCategories([]);
-    }
-  }, [searchParamQuery, searchCategoryParam]);
+  console.log(session);
 
   useEffect(() => {
     const token = session?.user?.token;
-    console.log(token);
+    console.log('Token:', token);
 
-    (async () => {
+    const fetchItems = async () => {
       try {
-        const url = `${process.env.API_URL_PREFIX}/api/items/items/`;
-        const res = await axios.get(url);
+        setIsLoading(true);
+        const url = '/api/items'; // Fetch all items without query parameters
+        const res = await axios.get(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (res.status === 200) {
           setItems(res.data);
-          console.log(res.data);
-          setIsLoading(false);
+          console.log('All Items:', res.data);
         }
       } catch (error: any) {
-        console.log(error);
+        console.log('Error fetching items:', error);
+      } finally {
+        setIsLoading(false);
       }
-    })();
-  }, [searchParamQuery, searchCategoryParam, query]);
+    };
 
-  // Filter items based on selected categories and query
+    if (session?.user) {
+      fetchItems();
+    }
+  }, [session?.user]);
+
+  // Filter items based on query and category
   const filteredItems = items.filter((item: any) => {
-    // Filter by selected categories if any category is selected
-    const matchesCategory = selectedCategories.length
-      ? selectedCategories.some(
-          (selectedCategory) =>
-            Array.isArray(item.category)
-              ? item.category.some(
-                  (cat: any) =>
-                    cat.toLowerCase() === selectedCategory.toLowerCase()
-                ) // Check if item.category contains the selected category (case insensitive)
-              : item.category.toLowerCase() === selectedCategory.toLowerCase() // Compare directly if item.category is a string (case insensitive)
+    const matchesCategory = searchCategoryParam
+      ? item.category.toLowerCase() === searchCategoryParam.toLowerCase()
+      : true;
+
+    const matchesQuery = searchParamQuery
+      ? item.keywords.some((keyword: string) =>
+          keyword.toLowerCase().includes(searchParamQuery.toLowerCase())
         )
       : true;
-
-    // Search by keywords or other properties
-    const matchesQuery = query
-      ? item.keywords
-          .split(',') // Split the comma-separated string into an array
-          .some((keyword: string) =>
-            keyword.trim().toLowerCase().includes(query.toLowerCase())
-          )
-      : true;
-
-    console.log(item?.keywords);
 
     return matchesCategory && matchesQuery;
   });
@@ -92,8 +75,8 @@ const Items = () => {
 
   // Determine if there are no results for the category or query
   const noResultsMessage =
-    (selectedCategories.length > 0 && filteredItems.length === 0) ||
-    (query.length > 0 && filteredItems.length === 0);
+    (searchCategoryParam && filteredItems.length === 0) ||
+    (searchParamQuery && filteredItems.length === 0);
 
   return (
     <div className="h-full rounded-md bg-secondary/70 p-2 md:p-4">
@@ -117,9 +100,9 @@ const Items = () => {
                   <Text className="text-sm">
                     No items found for{' '}
                     <b>
-                      {query
-                        ? `query: ${query}`
-                        : `category: ${selectedCategories.join(', ')}`}
+                      {searchParamQuery
+                        ? `query: ${searchParamQuery}`
+                        : `category: ${searchCategoryParam}`}
                     </b>
                   </Text>
                 </>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -18,10 +19,10 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import { z } from 'zod';
 import { signIn } from 'next-auth/react';
+import axios from 'axios';
 
 const SignIn = () => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [isEmail, setIsEmail] = useState<boolean>(false);
 
   // Initialize form with validation schema
   const form = useForm<z.infer<typeof loginInSchema>>({
@@ -33,43 +34,65 @@ const SignIn = () => {
     mode: 'onChange',
   });
 
-  // Validate email or username input pattern
-  const handleUsernameEmailChange = (value: string) => {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    setIsEmail(emailPattern.test(value));
-  };
+  // Validate email  input pattern
 
-  // Submission function
   async function onSubmit(values: z.infer<typeof loginInSchema>) {
     setLoading(true);
+
     const credentials = {
-      email: isEmail ? values.email : null,
-      username: isEmail ? null : values.email,
+      email: values.email,
       password: values.password,
     };
-    localStorage.setItem('email', values.email);
+
+    const url = `/api/signin/`; // URL to get the token
 
     try {
-      const result = await signIn('credentials', {
-        redirect: false,
-        ...credentials,
+      const res = await axios.post(url, credentials, {
+        headers: {
+          'Content-Type': 'application/json', // Axios adds this by default for JSON
+        },
       });
 
-      if (result?.ok) {
-        if (result.error) {
-          setLoading(false);
-          toast.error('Error logging in!');
+      if (res.status === 201) {
+        const user = res.data.user;
+
+        const credentials = {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          token: res.data.token,
+          image: user.image,
+        };
+
+        console.log('Response:', credentials);
+
+        const result = await signIn('credentials', {
+          redirect: false,
+          ...credentials,
+        });
+
+        if (result?.ok) {
+          if (result.error) {
+            setLoading(false);
+            toast.error('Error logging in!');
+          } else {
+            toast.success('Logged in successfully!');
+          }
         } else {
-          toast.success('Logged in successfully!');
+          toast.error('Error during login');
+          setLoading(false);
         }
-      } else {
-        toast.error('Error during login');
-        setLoading(false);
       }
-    } catch (error) {
+
+      // Handle the response
+    } catch (error: any) {
+      toast.error(error.response.data.error);
+
+      // Handle errors
+      console.error('Error:', error);
+    } finally {
       setLoading(false);
-      console.error('Error during login', error);
-      toast.error('An error occurred during login.');
     }
   }
 
@@ -82,22 +105,19 @@ const SignIn = () => {
           className="mx-auto flex w-full flex-col items-start gap-2 sm:gap-4"
           onSubmit={form.handleSubmit(onSubmit)}
         >
-          {/* Email or Username Field */}
+          {/* Email  Field */}
           <FormField
             control={form.control}
             name="email"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Email or Username</FormLabel>
+                <FormLabel>Email </FormLabel>
                 <FormControl>
                   <Input
                     className="w-full rounded-lg"
-                    placeholder="Enter your email or username"
+                    autoComplete="new-email"
+                    placeholder="Enter your email "
                     {...field}
-                    onChange={(e) => {
-                      handleUsernameEmailChange(e.target.value);
-                      field.onChange(e);
-                    }}
                   />
                 </FormControl>
                 <FormMessage className="dark:text-red-500" />

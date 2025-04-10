@@ -7,13 +7,18 @@ import { Button } from '@/components/ui/button';
 import { categories } from '@/lib/categories';
 import { Text } from '@/components/ui/text';
 import AddItemForm from './form';
+import { useSession } from 'next-auth/react';
 
 const AddNewItem = () => {
+  const { data: session } = useSession();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const handleCategorySelect = (category: string) => {
     setSelectedCategory(category);
   };
+
+  console.log(session);
+  if (!session) return <>Unauthorized</>;
 
   return (
     <div className="mx-auto flex max-w-[1000px] flex-col gap-2 rounded-md border border-input p-4 shadow-md md:p-6">

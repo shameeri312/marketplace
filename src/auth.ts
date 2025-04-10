@@ -4,87 +4,54 @@ import Google from 'next-auth/providers/google';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
+    // google sign in
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
     }),
+
+    // creds sign in
     Credentials({
       name: 'Credentials',
 
       credentials: {
-        username: { label: 'username', type: 'text', placeholder: 'username' },
+        id: { label: 'Id', type: 'id' },
         email: { label: 'Email', type: 'email' },
-        password: {
-          label: 'Password',
-          type: 'password',
+        firstName: {
+          label: 'First Name',
+          type: 'firstName',
+        },
+        lastName: {
+          label: 'Last Name',
+          type: 'lastName',
+        },
+        token: {
+          label: 'Token',
+          type: 'token',
+        },
+        image: {
+          label: 'Image',
+          type: 'image',
         },
       },
 
       authorize: async (credentials) => {
+        const id = credentials?.id as string | undefined;
         const email = credentials?.email as string | undefined;
-        const username = credentials?.username as string | undefined;
-        const password = credentials?.password as string | undefined;
+        const firstName = credentials?.firstName as string | undefined;
+        const lastName = credentials?.lastName as string | undefined;
+        const token = credentials?.token as string | undefined;
+        const image = credentials?.image as string | undefined;
 
-        const url = `${process.env.API_URL_PREFIX}/api/token/`; // this will get token to stay logged in and authorized
-        console.log('API URL Prefix:', process.env.API_URL_PREFIX);
-        console.log('Token URL:', `${process.env.API_URL_PREFIX}/api/token/`);
-
-        console.log(
-          'Profile URL:',
-          `${process.env.API_URL_PREFIX}/api/user/profile/`
-        );
-
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username,
-            email,
-            password,
-          }),
+        // return null;
+        return Promise.resolve({
+          id: id || '',
+          firstName: firstName || '',
+          lastName: lastName || '',
+          token: token || '',
+          email: email || '',
+          image: image || '',
         });
-
-        if (res.status == 200) {
-          const user = await res.json();
-
-          console.log('---------------------------');
-          console.log('----> ', user.access);
-          console.log('---------------------------');
-
-          const url = `${process.env.API_URL_PREFIX}/api/user/profile/`; // this will get token to stay logged in and authorized
-
-          const profile_res = await fetch(url, {
-            method: 'GET',
-            headers: {
-              Authorization: `Bearer ${user.access}`,
-            },
-          });
-
-          const profile = await profile_res.json();
-
-          console.log(profile_res);
-
-          // return null;
-          return Promise.resolve({
-            username: username ?? '',
-            email: email ?? '',
-            token: user.access,
-            firstName: profile?.first_name || '',
-            lastName: profile?.last_name || '',
-            image: profile?.photo,
-            userId: profile?.id,
-          });
-        } else {
-          const errorData = await res.json();
-          console.log(errorData);
-
-          const errorMessage = errorData?.error;
-          console.log('Error:', errorMessage);
-
-          return null;
-        }
       },
     }),
   ],

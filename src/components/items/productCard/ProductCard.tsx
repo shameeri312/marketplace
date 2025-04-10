@@ -6,31 +6,21 @@ import { Title } from '@/components/ui/title';
 import { useRouter } from 'next/navigation';
 import { Text } from '@/components/ui/text';
 import Image from 'next/image';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 const ProductCard = ({ content }: { content: any }) => {
   const router = useRouter();
-  const [url, setUrl] = useState<string>('');
 
-  const image = content?.image1.split('/');
-  console.log(content);
-
-  useEffect(() => {
-    if (image.includes('media')) {
-      setUrl(`${process.env.API_URL_PREFIX}${content?.image1}`);
-    } else {
-      setUrl(content?.image1);
-    }
-  }, [content]);
+  const image = content?.image1 ?? '/uploads/default.jpg';
 
   return (
     <Card
-      onClick={() => router.push(`/item/${content.id}`)}
+      onClick={() => router.push(`/item/${content._id}`)}
       className="w-[250px] cursor-pointer space-y-3 overflow-hidden p-1 shadow-md md:w-full"
     >
       <Image
-        src={url || '/job.jpg'}
-        alt={content.name || 'image'}
+        src={image}
+        alt={'product image'}
         className="h-[120px] rounded-t-md object-cover sm:w-full md:h-[150px] xl:h-[200px]"
         width={400}
         height={200}

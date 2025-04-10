@@ -21,42 +21,45 @@ const ItemView = ({ id }: { id: any }) => {
   useEffect(() => {
     (async () => {
       try {
-        const url = `${process.env.API_URL_PREFIX}/api/items/items/${id}/`;
+        const url = `/api/items/${id}/`;
         const res = await axios.get(url);
 
         if (res.status === 200) {
           setItem(res.data);
+
           console.log(res.data);
+
           setIsLoading(false);
         }
       } catch (error: any) {
-        setIsLoading(false);
         console.log(error);
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, [id]);
 
-  if (!session) return <Loading />;
+  console.log('Item: ', item);
 
   return isLoading ? (
     <Loading /> // Display the loading component when isLoading is true
-  ) : (
+  ) : item ? (
     <div className="grid gap-2 p-4 md:grid-cols-2">
       <div className="rounded-xl border bg-secondary shadow-lg">
         <Image
-          src={`${process.env.API_URL_PREFIX}${item?.image1}`}
+          src={item?.image1 ?? '/uploads/default.jpg'}
           width={300}
           height={300}
           className="h-[300px] w-full rounded-xl object-contain sm:h-[400px] lg:h-[500px]"
-          alt={item?.ad_title || 'image_preview'}
+          alt={item?.adTitle || 'image_preview'}
         />
       </div>
       <div className="flex flex-col items-start gap-3 rounded-xl">
         <div className="flex w-full flex-col items-start gap-3 rounded-xl border p-4">
           <div className="flex w-full justify-between">
             <Badge>{item?.category}</Badge>
-            {item.added_by.id === session?.user?.userId && (
-              <Link href={`/edit/${item?.id}`}>
+            {item.user._id === session?.user?.id && (
+              <Link href={`/edit/${item?._id}`}>
                 <Button size={'sm'} className="h-6 self-end" variant={'link'}>
                   <Pencil /> Edit
                 </Button>
@@ -64,7 +67,7 @@ const ItemView = ({ id }: { id: any }) => {
             )}
           </div>
           <h2 className="text-2xl font-bold capitalize sm:text-3xl lg:text-4xl">
-            {item?.ad_title}
+            {item?.adTitle}
           </h2>
 
           <div>
@@ -102,7 +105,7 @@ const ItemView = ({ id }: { id: any }) => {
           <Separator />
           <div className="flex w-full items-start gap-2">
             <Image
-              src={`${process.env.API_URL_PREFIX}${item?.added_by?.photo}`}
+              src={item?.user?.photo ?? '/profilePictures/profile.png'}
               alt="user"
               width={100}
               height={100}
@@ -112,8 +115,8 @@ const ItemView = ({ id }: { id: any }) => {
             <div className="flex w-[calc(100%_-_70px)] items-center justify-between">
               <div>
                 <h2 className="text-base font-semibold capitalize">
-                  {item?.added_by?.first_name}
-                  {item?.added_by?.last_name}
+                  {item?.user?.firstName}
+                  {item?.user?.lastName}
                 </h2>
                 <button className="border-b border-primary text-xs text-primary">
                   View profile
@@ -126,9 +129,7 @@ const ItemView = ({ id }: { id: any }) => {
                   onClick={() => {
                     localStorage.setItem(
                       'chat_name',
-                      item?.added_by?.first_name +
-                        ' ' +
-                        item?.added_by?.last_name
+                      item?.user?.firstName + ' ' + item?.user?.lastName
                     );
                   }}
                   size={'sm'}
@@ -142,6 +143,8 @@ const ItemView = ({ id }: { id: any }) => {
         </div>
       </div>
     </div>
+  ) : (
+    <>Not Found</>
   );
 };
 

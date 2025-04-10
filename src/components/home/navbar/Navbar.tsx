@@ -149,7 +149,9 @@ const Navbar = () => {
                   <PopoverTrigger className="flex items-center">
                     <Avatar>
                       <AvatarImage
-                        src={process.env.API_URL_PREFIX + session?.user?.image}
+                        src={
+                          session?.user?.image || '/profilePictures/profile.png'
+                        }
                         className="object-cover"
                       />
                       <AvatarFallback>
@@ -165,7 +167,8 @@ const Navbar = () => {
                       <Avatar className="size-20">
                         <AvatarImage
                           src={
-                            process.env.API_URL_PREFIX + session?.user?.image
+                            session?.user?.image ||
+                            '/profilePictures/profile.png'
                           }
                           className="object-cover"
                         />
