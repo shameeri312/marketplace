@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
 
     // Create new user
     const newUser = new User({
+      username: firstName + lastName,
       email,
       firstName,
       lastName,
@@ -98,6 +99,7 @@ export async function POST(req: NextRequest) {
 
     return response;
   } catch (error: any) {
+    console.log(error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

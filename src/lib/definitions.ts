@@ -15,8 +15,8 @@ export type User = {
 };
 
 export type Chat = {
-  chat_id: string;
-  chat_name: string;
+  chatId: string;
+  participants?: string[];
   messages?: Message[];
   is_important?: boolean;
 };

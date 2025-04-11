@@ -100,6 +100,11 @@ export function CategoriesMenu() {
       {/* separator */}
 
       <div className="hidden w-full items-center justify-start overflow-x-auto md:flex">
+        <Link href={'/explore'}>
+          <Button className="font-normal" variant={'outline'}>
+            Explore
+          </Button>
+        </Link>
         {menuLinks.map((link, index) => (
           <Link href={'/category/' + link.path} key={index}>
             <Button className="font-normal" variant={'ghost'}>

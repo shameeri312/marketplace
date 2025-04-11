@@ -8,7 +8,7 @@ import {
   Send,
   User,
 } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Form, FormControl, FormField, FormItem } from '@/components/ui/form';
@@ -19,25 +19,13 @@ import * as z from 'zod';
 import Link from 'next/link';
 import useChatColorStore from '@/zustand/colors/store';
 import { useSession } from 'next-auth/react';
-import Messages from './messages';
-import axios from 'axios';
 import Loading from '../loading/Loading';
+import { socket } from '@/lib/socketClient';
+import ChatMessage from './chatMessage';
 
 const formSchema = z.object({
   message: z.string().min(1, { message: 'Message cannot be empty' }),
 });
-
-interface ChatMessage {
-  sender: 'user' | 'bot';
-  type: 'message' | 'image' | 'link';
-  message: string;
-  time: string;
-  image?: string;
-  link?: string;
-  message_id?: string;
-  userId?: string;
-  chat?: string;
-}
 
 const Chat = ({ id }: { id: string }) => {
   const [messages, setMessages] = useState<any[]>([]);
@@ -45,8 +33,6 @@ const Chat = ({ id }: { id: string }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const { chatColor } = useChatColorStore();
   const { data: session }: any = useSession();
-  const [ws, setWs] = useState<WebSocket | null>(null);
-  const [userId, setUserId] = useState<string>('');
   const [roomId, setRoomId] = useState<string>(id); // Initialize with id ("12-1")
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -56,129 +42,113 @@ const Chat = ({ id }: { id: string }) => {
     },
   });
 
-  console.log(roomId);
-
   const chatRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null); // Ref for the input field
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const getMessages = async () => {
-    const token = session?.user?.token;
-
-    if (token) {
-      try {
-        const res = await axios.get(
-          `${process.env.API_URL_PREFIX}/chat/messages/`,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        if (res.status === 200) {
-          return res.data.filter((msg: ChatMessage) => msg.chat === id);
-        }
-        return [];
-      } catch (error) {
-        console.error('Error fetching messages:', error);
-        return [];
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
+  // Scroll to bottom when messages update
   useEffect(() => {
-    const fetchInitialData = async () => {
-      const fetchedMessages = await getMessages();
-      setMessages(fetchedMessages);
+    if (chatRef.current) {
+      chatRef.current.scrollTo({
+        top: chatRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [messages]);
 
-      const fetchChatName = async () => {
-        setChatName(localStorage.getItem('chat_name') ?? 'Chat');
-      };
-      await fetchChatName();
+  // Fetch previous messages from the database
+  const fetchPreviousMessages = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/messages?type=messages&roomId=${roomId}`);
+      if (!res.ok) {
+        throw new Error('Failed to fetch messages');
+      }
+      const data = await res.json();
+      setMessages(data); // Set initial messages from DB
+    } catch (error) {
+      console.error('Error fetching previous messages:', error);
+      toast.error('Failed to load previous messages');
+    }
+  }, [roomId]);
 
-      const uid = session?.user?.userId;
+  // Handle incoming messages via Socket.IO
+  const handleNewMessage = useCallback((data: any) => {
+    setMessages((prevMessages) => [...prevMessages, data]);
+  }, []);
 
-      if (uid) {
-        setUserId(uid);
-        console.log('Current userId set to:', uid);
-      } else {
-        console.warn('No userId from session');
+  // Initialize chat: Join room, fetch messages, set up listeners
+  useEffect(() => {
+    setRoomId(id); // Update roomId when id prop changes
+
+    const initializeChat = async () => {
+      if (!roomId) {
+        toast.error('No room ID provided');
+        setLoading(false);
+        return;
       }
 
-      if (id && userId) {
-        const socket = new WebSocket(
-          `ws://192.168.100.17:8008/ws/chat/${id}/?user_id=${uid}`
-        );
+      try {
+        // Set chatName from session or localStorage
+        const nameFromSession = session?.user?.name || 'Anonymous';
+        const storedName = localStorage.getItem('chat_name');
+        const finalChatName =
+          storedName || nameFromSession || `User_${Date.now()}`;
+        setChatName(finalChatName);
+        localStorage.setItem('chat_name', finalChatName);
 
-        socket.onopen = () => {
-          console.log('WebSocket connection established');
-          setWs(socket);
-        };
+        // Join the room
+        socket.emit('join-room', { roomId, userName: finalChatName });
 
-        socket.onerror = (event) => {
-          console.error('WebSocket connection error', event);
-          toast.error('Failed to connect to chat server.');
-        };
+        // Fetch previous messages from DB
+        await fetchPreviousMessages();
 
-        socket.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
+        // Listen for new messages
+        socket.on('message', handleNewMessage);
 
-            if (data.room) {
-              localStorage.setItem('room', data.room);
-              setRoomId(data.room);
-            } else {
-              setMessages((prevMessages) => {
-                const isDuplicate = prevMessages.some(
-                  (msg) => msg.message_id === data.message_id
-                );
-
-                if (!isDuplicate) {
-                  return [data, ...prevMessages];
-                }
-
-                return prevMessages;
-              });
-            }
-          } catch (error) {
-            console.error('Error parsing message', error);
-          }
-        };
-
-        return () => {
-          console.log('Closing WebSocket connection');
-          socket.close();
-        };
+        setLoading(false);
+      } catch (error) {
+        console.error('Error initializing chat:', error);
+        toast.error('Error connecting to the chat server');
+        setLoading(false);
       }
     };
 
-    fetchInitialData();
-  }, [id, session?.user, userId]);
+    initializeChat();
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    const newMessage = values.message;
-    if (!newMessage.trim() || !ws) return;
+    // Cleanup on unmount
+    return () => {
+      socket.off('message', handleNewMessage);
+      socket.emit('leave-room', { roomId, chatName });
+    };
+  }, [id, session, handleNewMessage, fetchPreviousMessages]);
+
+  // Handle form submission: Send message via API and Socket.IO
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const message = values.message;
 
     try {
-      ws.send(JSON.stringify({ body: newMessage, userId: userId }));
+      const data = { roomId, message, sender: chatName, timestamp: new Date() };
 
-      form.reset({
-        message: '',
-      });
+      // Optimistically update UI
+      setMessages((prevMessages) => [...prevMessages, data]);
 
-      // Focus the input after submission
+      // Send message via Socket.IO for real-time update
+      socket.emit('message', data);
+
+      // Reset form and focus input
+      form.reset({ message: '' });
+
       if (inputRef.current) {
         inputRef.current.focus();
       }
     } catch (error) {
-      console.error('Form submission error:', error);
-      toast.error('Failed to send the message.');
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message');
+      // Revert optimistic update if send fails
+      setMessages((prevMessages) => prevMessages.slice(0, -1));
     }
-  }
+  };
 
-  if (loading || !chatName) return <Loading />;
+  if (loading) return <Loading />;
 
   return (
     <div className="flex h-full w-full flex-col justify-between">
@@ -196,7 +166,7 @@ const Chat = ({ id }: { id: string }) => {
           <User
             style={{
               color: chatColor,
-              background: chatColor + '1d',
+              background: `${chatColor}1d`,
               borderColor: chatColor,
             }}
             className="size-12 rounded-full border p-2 text-white"
@@ -212,12 +182,24 @@ const Chat = ({ id }: { id: string }) => {
           </Button>
         </div>
       </div>
+
       <div
         ref={chatRef}
         className="flex-1 flex-col space-y-4 overflow-y-auto p-4"
       >
-        <Messages messages={messages} userId={userId} chatName={chatName} />
+        {messages.map((msg, i) => (
+          <ChatMessage
+            key={i}
+            color={chatColor}
+            sender={msg.sender}
+            message={msg.message}
+            isOwnMessage={msg.sender === chatName}
+            timestamp={msg.timestamp}
+          />
+        ))}
+        <div ref={chatRef} />
       </div>
+
       <div>
         <Form {...form}>
           <form
@@ -239,10 +221,11 @@ const Chat = ({ id }: { id: string }) => {
                   <FormControl>
                     <Input
                       {...field}
-                      ref={inputRef} // Attach the ref to the Input
+                      ref={inputRef}
                       placeholder="Enter message..."
                       className="h-full flex-1 outline-none !ring-0"
                       value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value)}
                     />
                   </FormControl>
                 </FormItem>
@@ -252,7 +235,7 @@ const Chat = ({ id }: { id: string }) => {
               size={'icon'}
               className="size-10 rounded-full"
               style={{ background: chatColor }}
-              variant={'default'}
+              type="submit"
             >
               <Send />
             </Button>

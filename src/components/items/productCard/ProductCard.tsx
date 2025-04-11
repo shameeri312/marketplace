@@ -19,7 +19,7 @@ const ProductCard = ({ content }: { content: any }) => {
       className="w-[250px] cursor-pointer space-y-3 overflow-hidden p-1 shadow-md md:w-full"
     >
       <Image
-        src={image}
+        src={image || '/uploads/default.jpg'}
         alt={'product image'}
         className="h-[120px] rounded-t-md object-cover sm:w-full md:h-[150px] xl:h-[200px]"
         width={400}

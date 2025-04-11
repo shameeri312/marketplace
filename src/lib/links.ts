@@ -1,7 +1,7 @@
 export const menuLinks = [
   { name: 'Mobile Phones', path: 'mobilePhones' },
-  { name: 'Cars', path: 'cars' },
-  { name: 'Motorcycles', path: 'motorcycles' },
+  { name: 'Vehicles', path: 'vehicles' },
+  { name: 'Bikes', path: 'bikes' },
   { name: 'Houses', path: 'houses' },
   { name: 'Tablets', path: 'tablets' },
   { name: 'Property', path: 'property' },

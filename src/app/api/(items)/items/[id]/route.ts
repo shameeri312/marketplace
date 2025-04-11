@@ -5,23 +5,39 @@ import Item from '@/models/Items.model';
 import { auth } from '@/auth';
 import fs from 'fs/promises';
 import path from 'path';
+import User from '@/models/User.model';
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  await dbConnect();
-
   try {
-    const item = await Item.findById(params.id);
+    // Connect to the database
+    await dbConnect();
+
+    // Get the item ID from params
+    const { id } = await params; // Destructure the id directly from params
+    console.log('Fetching item with ID:', id);
+
+    // Find the item by ID
+    const item = await Item.findById(id);
+
+    // Check if item exists
     if (!item) {
       return NextResponse.json({ error: 'Item not found' }, { status: 404 });
     }
 
     // Populate the user field with all details
-    const updatedItem = await item.populate('user');
-    return NextResponse.json(updatedItem, { status: 200 });
+    const user = await User.findById(item.user);
+
+    if (user) {
+      item.user = user;
+    }
+
+    // Return the populated item
+    return NextResponse.json(item, { status: 200 });
   } catch (error: any) {
+    console.error('Error in GET request:', error); // Log full error for debugging
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -1,11 +1,24 @@
-import React from 'react';
+'use client';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useState } from 'react';
 import CardsWrapper from '../../../items/cardsWrapper/CardsWrapper';
-import { cars } from '@/lib/data';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { Title } from '@/components/ui/title';
+import axios from 'axios';
 
 const Cars = () => {
+  const [cars, setCars] = useState<any[]>([]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await axios.get('/api/category/Vehicles');
+        setCars(res.data);
+      } catch (error) {
+        console.log(error);
+      }
+    })();
+  }, []);
   return (
     <>
       <div className="flex items-center justify-between px-2">

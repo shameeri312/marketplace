@@ -8,6 +8,7 @@
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
     "module": "esnext",
     "moduleResolution": "Node",
     "resolveJsonModule": true,
@@ -31,7 +32,7 @@
     "src/server.ts",
     "src/models/Message.model.ts",
     "src/models/Chat.model.ts",
-    "server.mts"
+    "server.ts"
   ],
   "exclude": ["node_modules"]
 }

@@ -16,7 +16,22 @@ import Link from 'next/link';
 const ItemView = ({ id }: { id: any }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [item, setItem] = useState<any>(null);
+  const [chatName, setChatName] = useState<string>('');
   const { data: session }: any = useSession();
+
+  useEffect(() => {
+    function generateChatroomName(user1Id: string, user2Id: string): string {
+      // Sort the IDs to ensure consistency (e.g., user1Id_user2Id is the same as user2Id_user1Id)
+      const sortedIds = [user1Id, user2Id].sort();
+      return `chat_${sortedIds[0]}_${sortedIds[1]}`;
+    }
+
+    const chatroomName = generateChatroomName(
+      item?.user?._id,
+      session?.user?.id
+    );
+    setChatName(chatroomName); // Output: "chat_12345_67890"
+  }, [item?.user?._id, session?.user]);
 
   useEffect(() => {
     (async () => {
@@ -123,7 +138,7 @@ const ItemView = ({ id }: { id: any }) => {
                 </button>
               </div>
 
-              <Link href={`/chat/12-1`}>
+              <Link href={'/chat/' + chatName}>
                 <Button
                   variant={'default'}
                   onClick={() => {

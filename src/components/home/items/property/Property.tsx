@@ -1,11 +1,25 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+'use client';
 import { Title } from '@/components/ui/title';
 import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import CardsWrapper from '../../../items/cardsWrapper/CardsWrapper';
-import { property } from '@/lib/data';
+import axios from 'axios';
 
 const Property = () => {
+  const [properties, setProperties] = useState<any[]>([]);
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await axios.get('/api/category/Property for Rent');
+        setProperties(res.data);
+      } catch (error) {
+        console.log(error);
+      }
+    })();
+  }, []);
+
   return (
     <>
       <div className="flex items-center justify-between px-2">
@@ -21,7 +35,7 @@ const Property = () => {
           </Link>
         </div>
       </div>
-      <CardsWrapper data={property} />
+      <CardsWrapper data={properties} />
     </>
   );
 };

@@ -7,8 +7,6 @@ import { Button } from '../ui/button';
 const Chat2 = ({ onSendMessage }: any) => {
   const [input, setInput] = useState('');
 
-  console.log('Start');
-
   const sendMessage = () => {
     onSendMessage(input);
     setInput('');

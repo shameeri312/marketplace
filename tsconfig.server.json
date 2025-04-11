@@ -9,5 +9,5 @@
     "noEmit": false,
     "isolatedModules": false
   },
-  "include": ["server.mts"] // Only include model files
+  "include": ["server.ts"] // Only include model files
 }

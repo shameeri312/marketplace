@@ -8,9 +8,11 @@ export async function GET(
   { params }: { params: { category: string } }
 ) {
   await dbConnect();
+  const queryParams = await params;
+  const categoryQuery = queryParams.category;
 
   try {
-    const items = await Item.find({ category: params.category }).sort({
+    const items = await Item.find({ category: categoryQuery }).sort({
       createdAt: -1,
     });
     return NextResponse.json(items, { status: 200 });

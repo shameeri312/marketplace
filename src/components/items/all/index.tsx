@@ -27,7 +27,6 @@ const Items = () => {
 
     const fetchItems = async () => {
       try {
-        setIsLoading(true);
         const url = '/api/items'; // Fetch all items without query parameters
         const res = await axios.get(url, {
           headers: {

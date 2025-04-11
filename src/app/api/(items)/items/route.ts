@@ -2,10 +2,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Item from '@/models/Items.model';
+import User from '@/models/User.model';
 import { auth } from '@/auth';
 import mongoose from 'mongoose';
 import fs from 'fs/promises';
 import path from 'path';
+
 export async function GET(req: NextRequest) {
   await dbConnect();
 
@@ -14,6 +16,7 @@ export async function GET(req: NextRequest) {
     const query = searchParams.get('query')?.toLowerCase() || '';
     const category = searchParams.get('category')?.toLowerCase() || '';
 
+    // Build the query for Items
     let itemsQuery = Item.find().sort({ createdAt: -1 });
 
     // Apply query search if provided
@@ -31,11 +34,28 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Populate the user field with all details
-    const items = await itemsQuery.populate('user');
+    // Fetch items (user field will contain ObjectIds)
+    const items = await itemsQuery.exec();
 
-    return NextResponse.json(items, { status: 200 });
+    // Extract all unique user IDs from the items
+    const userIds = [...new Set(items.map((item) => item.user.toString()))];
+
+    // Fetch all users corresponding to the user IDs
+    const users = await User.find({ _id: { $in: userIds } });
+
+    // Create a map of userId -> user object for quick lookup
+    const userMap = new Map(users.map((user) => [user._id.toString(), user]));
+
+    // Map items to include the user object in a separate field (userDetails)
+    const itemsWithUsers = items.map((item) => {
+      const itemObj = item.toObject(); // Convert Mongoose document to plain object
+      itemObj.userDetails = userMap.get(item.user.toString()) || null; // Add userDetails field
+      return itemObj;
+    });
+
+    return NextResponse.json(itemsWithUsers, { status: 200 });
   } catch (error: any) {
+    console.error('Error in GET /api/items:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -63,7 +83,6 @@ export async function POST(req: NextRequest) {
         files[key] = value; // Handle files (File objects)
       }
     }
-
 
     const {
       adTitle,
