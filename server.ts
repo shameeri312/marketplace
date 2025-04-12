@@ -9,7 +9,7 @@ import Chat from './src/models/Chat.model.ts';
 import Message from './src/models/Message.model.ts';
 
 const dev = process.env.NODE_ENV !== 'production';
-const hostname = process.env.HOSTNAME || 'localhost';
+const hostname = '0.0.0.0';
 const port = parseInt(process.env.PORT || '3000', 10);
 
 const app = next({ dev, hostname, port });
