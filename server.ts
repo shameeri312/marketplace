@@ -15,7 +15,8 @@ const port = parseInt(process.env.PORT || '3000', 10);
 const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
-const MONGODB_URI = 'mongodb://localhost:27017/practice';
+const MONGODB_URI =
+  'mongodb+srv://atlas-sample-dataset-load-67f96ec0a939f22be8ee9826:3SOw9kFROat3IeSR@cluster0.a6tkgh4.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
 
 const dbConnect = async () => {
   const connectionState = mongoose.connection.readyState;
