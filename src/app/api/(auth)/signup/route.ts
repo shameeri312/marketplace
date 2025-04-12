@@ -23,19 +23,19 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    // const existingUser = await User.findOne({ email });
 
-    if (existingUser) {
-      return NextResponse.json(
-        {
-          created: false,
-          mailAlreadyExist: true,
-          activeUser: existingUser.isActive,
-          message: `User with ${email} email already exists!`,
-        },
-        { status: 400 }
-      );
-    }
+    // if (existingUser) {
+    //   return NextResponse.json(
+    //     {
+    //       created: false,
+    //       mailAlreadyExist: true,
+    //       activeUser: existingUser.isActive,
+    //       message: `User with ${email} email already exists!`,
+    //     },
+    //     { status: 400 }
+    //   );
+    // }
 
     // Check password length
     if (password.length < 5) {
