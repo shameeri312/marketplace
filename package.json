@@ -4,12 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev  --turbopack  -p 3000",
+    "dev": "next dev --turbopack -p 3000",
     "dev:socket": "NODE_OPTIONS='--loader ts-node/esm --trace-warnings --no-warnings' ts-node server.ts",
     "app": "concurrently \"pnpm dev\" \"pnpm dev:socket\"",
-    "server": "node ./server.js",
     "build": "next build",
+    "build:server": "tsc server.ts --outDir dist",
     "start": "PORT=3000 next start",
+    "start:server": "node dist/server.js",
+    "start:app": "concurrently \"pnpm start\" \"pnpm start:server\"",
     "lint": "next lint",
     "build:models": "tsc --project tsconfig.models.json"
   },

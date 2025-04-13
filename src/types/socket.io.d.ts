@@ -2,7 +2,6 @@
 import { Server as NetServer } from 'http';
 import { Socket as NetSocket } from 'net';
 import { Server as IOServer } from 'socket.io';
-import { NextApiResponse } from 'next';
 
 declare module 'http' {
   interface Server extends NetServer {
