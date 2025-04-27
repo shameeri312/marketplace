@@ -8,8 +8,21 @@ import { Text } from '@/components/ui/text';
 import Image from 'next/image';
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 
-const ProductCard = ({ content }: { content: any }) => {
+interface ProductCardProps {
+  content: any;
+  isSelectable?: boolean;
+  isSelected?: boolean;
+  onSelect?: () => void;
+}
+
+const ProductCard = ({
+  content,
+  isSelectable = false,
+  isSelected = false,
+  onSelect,
+}: ProductCardProps) => {
   const router = useRouter();
 
   const image = content?.image1 ?? '/uploads/default.jpg';
@@ -20,6 +33,15 @@ const ProductCard = ({ content }: { content: any }) => {
       className="relative w-[250px] cursor-pointer space-y-3 overflow-hidden p-1 shadow-md md:w-full"
     >
       <div className="relative">
+        {/* Checkbox for selection */}
+        {isSelectable && (
+          <div
+            className="absolute left-2 top-2 z-10"
+            onClick={(e) => e.stopPropagation()} // Prevent card navigation on checkbox click
+          >
+            <Checkbox checked={isSelected} onCheckedChange={onSelect} />
+          </div>
+        )}
         <div className="absolute right-2 top-2 flex items-end gap-1">
           {content?.rent && (
             <Badge
@@ -40,7 +62,7 @@ const ProductCard = ({ content }: { content: any }) => {
         </div>
 
         <Image
-          src={image || '/Uploads/default.jpg'}
+          src={image || '/uploads/default.jpg'}
           alt="product image"
           className="h-[120px] rounded-t-md object-cover sm:w-full md:h-[150px] xl:h-[200px]"
           width={400}
@@ -60,7 +82,7 @@ const ProductCard = ({ content }: { content: any }) => {
         </div>
         <Title
           size="sm"
-          className="catpitalize truncate text-secondary-foreground"
+          className="truncate capitalize text-secondary-foreground"
           as="h6"
         >
           {content.name || content.title}
@@ -74,7 +96,6 @@ const ProductCard = ({ content }: { content: any }) => {
 
         <Text className="font-medium" as="p">
           <span className="text-xs font-light text-accent-foreground sm:text-sm">
-            {/* {formatRelativeTime()} */}
             {content?.created_at || 'a while ago'}
           </span>
         </Text>

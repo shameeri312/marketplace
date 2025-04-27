@@ -10,6 +10,15 @@ import { FcEmptyTrash } from 'react-icons/fc';
 import { Title } from '@/components/ui/title';
 import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import Image from 'next/image';
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 
 const ItemsByCategory = ({ category }: { category: string }) => {
   const [items, setItems] = useState<any[]>([]);
@@ -22,6 +31,9 @@ const ItemsByCategory = ({ category }: { category: string }) => {
   );
   const [query, setQuery] = useState<string>(searchParamQuery);
   const [visibleItems, setVisibleItems] = useState<number>(9);
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [isCompareDialogOpen, setIsCompareDialogOpen] =
+    useState<boolean>(false);
 
   useEffect(() => {
     // Update query and selected categories whenever URL params change
@@ -51,8 +63,8 @@ const ItemsByCategory = ({ category }: { category: string }) => {
 
         if (res.status === 200) {
           const data = await res.json();
+          console.log('Fetched Items:', data); // Debug: Log fetched items
           setItems(data);
-          console.log('Items:', data);
         }
       } catch (error: any) {
         console.log('Error fetching items:', error);
@@ -63,6 +75,19 @@ const ItemsByCategory = ({ category }: { category: string }) => {
 
     fetchItems();
   }, [category]);
+
+  // Handle item selection for comparison
+  const handleSelectItem = (itemId: string) => {
+    setSelectedItems((prev) => {
+      if (prev.includes(itemId)) {
+        return prev.filter((id) => id !== itemId);
+      }
+      if (prev.length >= 2) {
+        return prev; // Limit to 2 items
+      }
+      return [...prev, itemId];
+    });
+  };
 
   // Group items by name for price comparison (Mobile Phones only)
   const priceComparisonData =
@@ -76,10 +101,16 @@ const ItemsByCategory = ({ category }: { category: string }) => {
             acc[itemName].push({
               price: item.price || 0,
               seller:
-                item.userDetails.firstName + ' ' + item.userDetails.lastName ||
-                'Unknown Seller',
+                item.userDetails?.firstName && item.userDetails?.lastName
+                  ? `${item.userDetails.firstName} ${item.userDetails.lastName}`
+                  : 'Unknown Seller',
               id: item.id || item._id || Math.random().toString(),
-              keywords: item.keywords || [],
+              keywords:
+                typeof item.keywords === 'string'
+                  ? item.keywords.split(',').map((k: string) => k.trim())
+                  : Array.isArray(item.keywords)
+                    ? item.keywords
+                    : [],
             });
             return acc;
           },
@@ -95,7 +126,6 @@ const ItemsByCategory = ({ category }: { category: string }) => {
     category === 'Mobile Phones'
       ? Object.entries(priceComparisonData).reduce(
           (acc, [itemName, listings]) => {
-            // Only include items with two or more listings
             if (listings.length < 2) return acc;
 
             const matchesQuery = query
@@ -133,9 +163,18 @@ const ItemsByCategory = ({ category }: { category: string }) => {
 
     const matchesQuery = query
       ? item.keywords &&
-        item.keywords.some((keyword: any) =>
-          keyword.toLowerCase().includes(query.toLowerCase())
-        )
+        (typeof item.keywords === 'string'
+          ? item.keywords
+              .split(',')
+              .map((k: string) => k.trim())
+              .some((keyword: string) =>
+                keyword.toLowerCase().includes(query.toLowerCase())
+              )
+          : Array.isArray(item.keywords)
+            ? item.keywords.some((keyword: string) =>
+                keyword.toLowerCase().includes(query.toLowerCase())
+              )
+            : false)
       : true;
 
     return matchesCategory && matchesQuery;
@@ -148,6 +187,9 @@ const ItemsByCategory = ({ category }: { category: string }) => {
   const loadMore = () => {
     setVisibleItems((prev) => prev + 9);
   };
+
+  // Get selected items for comparison
+  const compareItems = items.filter((item) => selectedItems.includes(item._id));
 
   // Determine if there are no results for the category or query
   const noResultsMessage =
@@ -162,69 +204,36 @@ const ItemsByCategory = ({ category }: { category: string }) => {
         <>
           {/* Price Comparison Tool for Mobile Phones */}
           {category === 'Mobile Phones' && (
-            <div className="mb-6">
-              <Title size="md" as="h3" className="mb-4">
-                Price Comparison
+            <div className="flex w-full items-center justify-between">
+              <Title size="sm" className="font-medium">
+                Compare Mobile Phones
               </Title>
-              {Object.keys(filteredPriceData).length > 0 ? (
-                <div className="space-y-4">
-                  <table className="w-full border-collapse text-sm">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="border p-2 text-left">Item</th>
-                        <th className="border p-2 text-left">Seller</th>
-                        <th className="border p-2 text-left">Price</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Object.entries(filteredPriceData).map(
-                        ([itemName, listings]) =>
-                          listings
-                            .sort((a, b) => a.price - b.price) // Sort by price (lowest first)
-                            .map((listing, index) => (
-                              <tr
-                                key={`${itemName}-${index}`}
-                                className="border-b"
-                              >
-                                {index === 0 && (
-                                  <td
-                                    className="border p-2"
-                                    rowSpan={listings.length}
-                                  >
-                                    {itemName}
-                                  </td>
-                                )}
-                                <td className="border p-2">{listing.seller}</td>
-                                <td className="border p-2">
-                                  <Link
-                                    href={`/item/${listing.id}`}
-                                    className="text-blue-600 hover:underline"
-                                  >
-                                    ${listing.price.toFixed(2)}
-                                  </Link>
-                                </td>
-                              </tr>
-                            ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <Text className="text-sm">
-                  No price comparisons available for{' '}
-                  <b>{query ? `query: ${query}` : 'Mobile Phones'}</b>
-                </Text>
+              {/* Compare Button */}
+              {category === 'Mobile Phones' && (
+                <Button
+                  size={'sm'}
+                  className="mt-4"
+                  disabled={selectedItems.length < 2}
+                  onClick={() => setIsCompareDialogOpen(true)}
+                >
+                  Compare Selected Items
+                </Button>
               )}
-              <Separator className="my-4" />
             </div>
           )}
+          <Separator className="my-4" />
 
           {/* Item Grid */}
           {displayedItems.length > 0 ? (
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
               {displayedItems.map((content: any, index: number) => (
                 <div key={index}>
-                  <ProductCard content={content} />
+                  <ProductCard
+                    content={content}
+                    isSelectable={category === 'Mobile Phones'}
+                    isSelected={selectedItems.includes(content._id)}
+                    onSelect={() => handleSelectItem(content._id)}
+                  />
                 </div>
               ))}
             </div>
@@ -245,21 +254,114 @@ const ItemsByCategory = ({ category }: { category: string }) => {
               )}
             </div>
           )}
+
+          {/* Comparison Dialog */}
+          {category === 'Mobile Phones' && (
+            <Dialog
+              open={isCompareDialogOpen}
+              onOpenChange={setIsCompareDialogOpen}
+            >
+              <DialogContent className="h-[99vh] overflow-y-auto sm:h-max sm:max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle className="text-center">
+                    Compare Mobile Phones
+                  </DialogTitle>
+                </DialogHeader>
+                <Separator />
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:p-4">
+                  {compareItems.map((item) => {
+                    return (
+                      <div key={item._id} className="flex flex-col space-y-4">
+                        <h3 className="text-lg font-semibold">
+                          {item.adTitle || item.name || 'Untitled Item'}
+                        </h3>
+                        <div className="flex justify-center">
+                          {item.image1 || item.image2 || item.image3 ? (
+                            <Image
+                              src={item.image1 || item.image2 || item.image3}
+                              alt={item.adTitle || item.name || 'Item image'}
+                              width={200}
+                              height={200}
+                              className="h-40 w-full rounded-lg object-cover shadow-lg sm:h-48 md:h-52"
+                            />
+                          ) : (
+                            <div className="flex h-48 w-48 items-center justify-center rounded-md bg-gray-200">
+                              <span className="text-gray-500">No image</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <Table className="w-full text-sm">
+                          <TableBody>
+                            <TableRow>
+                              <TableCell className="pr-2 font-bold">
+                                Price:
+                              </TableCell>
+                              <TableCell>
+                                {item.price && item.currency
+                                  ? `${item.currency} ${item.price.toFixed(2)}`
+                                  : item.salary && item.currency
+                                    ? `${item.currency} ${item.salary}`
+                                    : 'N/A'}
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="pr-2 font-bold">
+                                Description:
+                              </TableCell>
+                              <TableCell>
+                                {item.description || 'No description available'}
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="pr-2 font-bold">
+                                Category:
+                              </TableCell>
+                              <TableCell>{item.category || 'N/A'}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="pr-2 font-bold">
+                                Seller:
+                              </TableCell>
+                              <TableCell>
+                                {item.userDetails?.firstName &&
+                                item.userDetails?.lastName
+                                  ? `${item.userDetails.firstName} ${item.userDetails.lastName}`
+                                  : 'Unknown'}
+                              </TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </div>
+                    );
+                  })}
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsCompareDialogOpen(false)}
+                  >
+                    Close
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+
+          <div className="flex justify-center">
+            {/* Load More Button */}
+            {visibleItems < filteredItems.length && (
+              <Button
+                className="mx-auto my-4"
+                variant={'outline'}
+                onClick={loadMore}
+              >
+                Load More
+              </Button>
+            )}
+          </div>
         </>
       )}
-
-      <div className="flex justify-center">
-        {/* Load More Button */}
-        {visibleItems < filteredItems.length && (
-          <Button
-            className="mx-auto my-4"
-            variant={'outline'}
-            onClick={loadMore}
-          >
-            Load More
-          </Button>
-        )}
-      </div>
     </div>
   );
 };

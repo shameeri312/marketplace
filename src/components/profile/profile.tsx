@@ -8,8 +8,6 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
-import { Title } from '@/components/ui/title';
-import { Separator } from '@/components/ui/separator';
 import { useSession } from 'next-auth/react';
 import axios from 'axios';
 import {

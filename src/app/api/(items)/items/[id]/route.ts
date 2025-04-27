@@ -158,22 +158,24 @@ export async function PATCH(
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
+
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   await dbConnect();
-
+  const { id } = await params;
   try {
-    const item = await Item.findByIdAndDelete(params.id);
+    const item = await Item.findByIdAndDelete(id);
     if (!item) {
       return NextResponse.json({ error: 'Item not found' }, { status: 404 });
     }
     return NextResponse.json(
       { message: 'Item deleted successfully' },
-      { status: 204 }
+      { status: 200 }
     );
   } catch (error: any) {
+    console.log('Error:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

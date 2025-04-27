@@ -18,4 +18,4 @@ COPY . .
 EXPOSE 3000
 
 # Command to run the server
-CMD ["pnpm", "run", "dev:socket"]
+CMD ["pnpm", "run", "app"]

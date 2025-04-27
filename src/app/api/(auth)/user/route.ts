@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import User from '@/models/User.model';
-import multer from 'multer';
+import fs from 'fs/promises';
 import path from 'path';
 import jwt from 'jsonwebtoken';
 
@@ -98,32 +98,12 @@ export const config = {
   },
 };
 
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: path.join(process.cwd(), 'public/uploads/profiles'),
-    filename: (req, file, cb) => {
-      const ext = file.originalname.split('.').pop()?.toLowerCase() || 'png';
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`;
-      cb(null, fileName);
-    },
-  }),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  fileFilter: (req, file, cb) => {
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-    if (allowedTypes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type'), false);
-    }
-  },
-});
-
 export async function PUT(req: NextRequest) {
   await dbConnect();
 
   try {
+    // Verify token
     const token = req.headers.get('authorization')?.replace('Bearer ', '');
-
     if (!token) {
       return NextResponse.json(
         { error: 'No token provided!' },
@@ -131,56 +111,98 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // Verify token
     const decoded: any = jwt.verify(token, SECRET_KEY);
     const user = await User.findById(decoded.userId);
-
     if (!user) {
       return NextResponse.json({ error: 'User not found!' }, { status: 404 });
     }
 
-    // Parse form data with multer
-    const formData = await new Promise((resolve, reject) => {
-      upload.single('photo')(req as any, {} as any, (err: any) => {
-        if (err) reject(err);
-        resolve(req);
-      });
-    });
+    // Parse FormData
+    const formData = await req.formData();
+    console.log('--> FormData:', formData);
 
-    const { body, file } = formData as any;
+    // Extract fields and files from FormData
+    const fields: { [key: string]: string | string[] } = {};
+    const files: { [key: string]: File | null } = {};
 
-    // Handle image upload
-    let photoPath = user.photo;
-    if (file) {
-      photoPath = `/uploads/profiles/${file.filename}`;
+    for (const [key, value] of formData.entries()) {
+      if (typeof value === 'string') {
+        fields[key] = value;
+      } else {
+        files[key] = value;
+      }
     }
 
-    // Update user data
-    const updateData = { ...body, photo: photoPath };
+    console.log('--> Fields:', fields);
+
+    // Handle single image upload
+    const uploadDir = path.join(process.cwd(), 'public/uploads/profiles');
+    await fs.mkdir(uploadDir, { recursive: true });
+
+    const imagePaths: string[] = [];
+    const file = files['photo'] as File | null;
+
+    if (file) {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${ext}`;
+      const filePath = path.join(uploadDir, fileName);
+      const arrayBuffer = await file.arrayBuffer();
+      await fs.writeFile(filePath, Buffer.from(arrayBuffer));
+      imagePaths.push(`/uploads/profiles/${fileName}`);
+    }
+
+    console.log('--> Image Paths:', imagePaths);
+
+    // Prepare update data
+    const updateData = {
+      email: fields.email,
+      firstName: fields.firstName,
+      lastName: fields.lastName,
+      phoneNo: fields.phoneNo,
+      city: fields.city,
+      country: fields.country,
+      about: fields.about,
+      gender: fields.gender,
+      dateOfBirth: fields.dateOfBirth
+        ? new Date(fields.dateOfBirth)
+        : undefined,
+      photo: imagePaths[0] || undefined, // Use the image path if available
+    };
+
+    // Remove undefined fields to avoid overwriting with undefined
+    Object.keys(updateData).forEach((key) => {
+      if (updateData[key] === undefined) {
+        delete updateData[key];
+      }
+    });
+
+    // Update user in the database
     const updatedUser = await User.findByIdAndUpdate(
       decoded.userId,
       { $set: updateData },
       { new: true, runValidators: true }
     );
 
-    return NextResponse.json(
-      {
-        message: 'User updated successfully!',
-        user: {
-          email: updatedUser.email,
-          firstName: updatedUser.firstName,
-          lastName: updatedUser.lastName,
-          phoneNo: updatedUser.phoneNo,
-          photo: updatedUser.photo,
-          city: updatedUser.city,
-          country: updatedUser.country,
-          about: updatedUser.about,
-          gender: updatedUser.gender,
-          dateOfBirth: updatedUser.dateOfBirth,
-        },
+    if (!updatedUser) {
+      return NextResponse.json({ error: 'User not found!' }, { status: 404 });
+    }
+
+    // Return response
+    return NextResponse.json({
+      message: 'User updated successfully!',
+      user: {
+        email: updatedUser.email,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        phoneNo: updatedUser.phoneNo,
+        photo: updatedUser.photo,
+        city: updatedUser.city,
+        country: updatedUser.country,
+        about: updatedUser.about,
+        gender: updatedUser.gender,
+        dateOfBirth: updatedUser.dateOfBirth,
       },
-      { status: 200 }
-    );
+    });
   } catch (error: any) {
     console.error('Error updating user:', error);
     return NextResponse.json({ error: error.message }, { status: 401 });
