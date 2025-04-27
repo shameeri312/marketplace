@@ -8,7 +8,6 @@ import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { FcEmptyTrash } from 'react-icons/fc';
 import { Title } from '@/components/ui/title';
-import Link from 'next/link';
 import { Separator } from '@/components/ui/separator';
 import {
   Dialog,
@@ -203,13 +202,13 @@ const ItemsByCategory = ({ category }: { category: string }) => {
       ) : (
         <>
           {/* Price Comparison Tool for Mobile Phones */}
-          {category === 'Mobile Phones' && (
+          {
             <div className="flex w-full items-center justify-between">
               <Title size="sm" className="font-medium">
                 Compare Mobile Phones
               </Title>
               {/* Compare Button */}
-              {category === 'Mobile Phones' && (
+              {
                 <Button
                   size={'sm'}
                   className="mt-4"
@@ -218,9 +217,9 @@ const ItemsByCategory = ({ category }: { category: string }) => {
                 >
                   Compare Selected Items
                 </Button>
-              )}
+              }
             </div>
-          )}
+          }
           <Separator className="my-4" />
 
           {/* Item Grid */}
@@ -230,7 +229,7 @@ const ItemsByCategory = ({ category }: { category: string }) => {
                 <div key={index}>
                   <ProductCard
                     content={content}
-                    isSelectable={category === 'Mobile Phones'}
+                    isSelectable={true}
                     isSelected={selectedItems.includes(content._id)}
                     onSelect={() => handleSelectItem(content._id)}
                   />
@@ -256,7 +255,7 @@ const ItemsByCategory = ({ category }: { category: string }) => {
           )}
 
           {/* Comparison Dialog */}
-          {category === 'Mobile Phones' && (
+          {
             <Dialog
               open={isCompareDialogOpen}
               onOpenChange={setIsCompareDialogOpen}
@@ -291,7 +290,7 @@ const ItemsByCategory = ({ category }: { category: string }) => {
                           )}
                         </div>
 
-                        <Table className="w-full text-sm">
+                        <Table className="w-full border text-sm">
                           <TableBody>
                             <TableRow>
                               <TableCell className="pr-2 font-bold">
@@ -346,7 +345,7 @@ const ItemsByCategory = ({ category }: { category: string }) => {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-          )}
+          }
 
           <div className="flex justify-center">
             {/* Load More Button */}
