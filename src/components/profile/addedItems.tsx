@@ -90,9 +90,7 @@ const AddedItems = () => {
   ) : (
     <Card className="mx-auto h-[calc(100vh_-_150px)] max-w-4xl flex-1 overflow-y-auto bg-secondary/70 p-4">
       <Title className="pb-2">Your Listings</Title>
-      {items.length === 0 ? (
-        <p className="text-center text-gray-500">No items found.</p>
-      ) : (
+      {items.length > 0 ? (
         <div className="flex flex-col space-y-4">
           {items.map((item) => (
             <div
@@ -171,6 +169,8 @@ const AddedItems = () => {
             </div>
           ))}
         </div>
+      ) : (
+        <p className="text-center text-gray-500">No items found.</p>
       )}
     </Card>
   );
