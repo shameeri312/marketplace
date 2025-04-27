@@ -9,8 +9,6 @@ export default async function ItemsPage({
   const query = (await searchParams)?.query || '';
   const category = (await searchParams)?.category || '';
 
-
-  
   return (
     <>
       <main className="padding">

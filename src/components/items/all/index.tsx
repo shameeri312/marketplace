@@ -56,9 +56,14 @@ const Items = () => {
       : true;
 
     const matchesQuery = searchParamQuery
-      ? item.keywords.some((keyword: string) =>
-          keyword.toLowerCase().includes(searchParamQuery.toLowerCase())
-        )
+      ? item.keywords
+        ? item.keywords
+            .split(',')
+            .map((keyword: string) => keyword.trim().toLowerCase())
+            .some((keyword: string) =>
+              keyword.includes(searchParamQuery.toLowerCase())
+            )
+        : false
       : true;
 
     return matchesCategory && matchesQuery;

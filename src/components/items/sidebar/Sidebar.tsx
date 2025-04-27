@@ -80,33 +80,39 @@ const Sidebar = ({
   };
 
   return (
-    <div className="space-y-2 rounded-md bg-secondary/70 p-4">
-      <Title as="h6" size="sm" className="font-normal">
-        {query ? `Search results for: ${query}` : 'Explore'}
+    <>
+      <Title as="h6" size="sm" className="mb-2 rounded-md bg-secondary/70 p-4">
+        Explore:{' '}
+        {query && (
+          <>
+            <span className="font-semibold capitalize">{query}</span>
+          </>
+        )}
       </Title>
-      <Separator />
-      <Title size="md">Categories</Title>
-      <Separator />
-      <div className="flex flex-col gap-2 pl-2">
-        {Object.keys(categories).map((key, index) => (
-          <div key={index} className="flex items-center gap-2 truncate">
-            <Checkbox
-              id={key}
-              checked={selectedCategories.includes(key)}
-              onCheckedChange={() => handleCategoryToggle(key)}
-            />
-            <Label htmlFor={key}>
-              <Button
-                className="!h-4 !p-0 font-normal text-muted-foreground hover:text-black"
-                variant={'link'}
-              >
-                {key}
-              </Button>
-            </Label>
-          </div>
-        ))}
+      <div className="space-y-2 rounded-md bg-secondary/70 p-4">
+        <Title size="md">Categories</Title>
+        <Separator />
+        <div className="flex flex-col gap-2 pl-2">
+          {Object.keys(categories).map((key, index) => (
+            <div key={index} className="flex items-center gap-2 truncate">
+              <Checkbox
+                id={key}
+                checked={selectedCategories.includes(key)}
+                onCheckedChange={() => handleCategoryToggle(key)}
+              />
+              <Label htmlFor={key}>
+                <Button
+                  className="!h-4 !p-0 font-normal text-muted-foreground hover:text-black"
+                  variant={'link'}
+                >
+                  {key}
+                </Button>
+              </Label>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

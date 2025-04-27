@@ -119,13 +119,21 @@ const ChatSidebar = () => {
                 // For now, we don't have messages in the Chat model; adjust if needed
                 const messages = []; // Placeholder; update if you add messages to Chat model
 
+                const user = chat.participants?.filter(
+                  (p) =>
+                    p !==
+                    session?.user?.firstName + ' ' + session?.user?.lastName
+                )[0];
+
+                console.log(chat.participants);
+
                 return (
                   <li
                     className="flex h-16 cursor-pointer items-center border-b border-neutral-400 px-2 hover:bg-neutral-100"
                     key={index}
                     onClick={() => {
                       // Navigate to the chat room using the chat's name as the roomId
-                      router.push(`/chat/${chat?.chatId}`);
+                      router.push(`/chat/${chat?.chatId}?user=${user}`);
                     }}
                   >
                     <User
@@ -140,10 +148,7 @@ const ChatSidebar = () => {
                       <p
                         className={`truncate text-wrap text-base ${messages.length > 0 ? 'font-bold' : 'font-medium'}`}
                       >
-                        {chat?.participants[0] ===
-                        session?.user?.firstName + ' ' + session?.user?.lastName
-                          ? chat?.participants[1]
-                          : chat?.participants[0]}
+                        {user}
                       </p>
                       <p className="text-xs font-light">
                         {messages.length > 0 ? 'New Message' : 'No Messages'}

@@ -99,9 +99,12 @@ export async function POST(req: NextRequest) {
       postalCode,
       specifications,
       keywords,
+      rent,
+      exchange,
     } = fields;
 
     // Generate keywords from adTitle
+
     const generatedKeywords = adTitle
       ? Array.from(
           new Set(typeof adTitle === 'string' ? adTitle.split(' ') : [])
@@ -148,6 +151,8 @@ export async function POST(req: NextRequest) {
       image1: imagePaths[0] || null,
       image2: imagePaths[1] || null,
       image3: imagePaths[2] || null,
+      rent: rent === 'false' ? false : true,
+      exchange: exchange === 'false' ? false : true,
     });
 
     await newItem.save();

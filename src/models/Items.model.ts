@@ -112,6 +112,14 @@ const itemSchema: Schema = new Schema(
       type: String,
       trim: true,
     },
+    rent: {
+      type: Boolean,
+      default: false,
+    },
+    exchange: {
+      type: Boolean,
+      default: false,
+    },
     createdAt: {
       type: Date,
       default: Date.now,

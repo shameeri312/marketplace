@@ -7,17 +7,21 @@ import { Text } from '@/components/ui/text';
 import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { FcEmptyTrash } from 'react-icons/fc';
+import { Title } from '@/components/ui/title';
+import Link from 'next/link';
+import { Separator } from '@/components/ui/separator';
 
-const ItemsByCategory = ({ items }: { items: any[] }) => {
+const ItemsByCategory = ({ category }: { category: string }) => {
+  const [items, setItems] = useState<any[]>([]);
   const params = useSearchParams();
-  const searchParamQuery = params.get('query') || ''; // Get 'query' from URL params
-  const searchCategoryParam = params.get('category') || ''; // Get 'category' from URL params
+  const searchParamQuery = params.get('query') || '';
+  const searchCategoryParam = params.get('category') || '';
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    searchCategoryParam ? searchCategoryParam.split(',') : [] // Initialize from query params
+    searchCategoryParam ? searchCategoryParam.split(',') : []
   );
-  const [query, setQuery] = useState<string>(searchParamQuery); // Initialize query with URL param
-  const [visibleItems, setVisibleItems] = useState<number>(9); // For "Load More" functionality
+  const [query, setQuery] = useState<string>(searchParamQuery);
+  const [visibleItems, setVisibleItems] = useState<number>(9);
 
   useEffect(() => {
     // Update query and selected categories whenever URL params change
@@ -31,33 +35,105 @@ const ItemsByCategory = ({ items }: { items: any[] }) => {
   }, [searchParamQuery, searchCategoryParam]);
 
   useEffect(() => {
-    setIsLoading(true);
     // Simulate filtering process
     const timeout = setTimeout(() => {
       setIsLoading(false);
-    }, 500); // Adjust this time based on the complexity of filtering
+    }, 500);
 
-    return () => clearTimeout(timeout); // Clean up timeout
+    return () => clearTimeout(timeout);
   }, [searchParamQuery, searchCategoryParam, query]);
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const url = `/api/category/${category}`;
+        const res = await fetch(url);
+
+        if (res.status === 200) {
+          const data = await res.json();
+          setItems(data);
+          console.log('Items:', data);
+        }
+      } catch (error: any) {
+        console.log('Error fetching items:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchItems();
+  }, [category]);
+
+  // Group items by name for price comparison (Mobile Phones only)
+  const priceComparisonData =
+    category === 'Mobile Phones'
+      ? items.reduce(
+          (acc, item) => {
+            const itemName = item.name || 'Unknown Item';
+            if (!acc[itemName]) {
+              acc[itemName] = [];
+            }
+            acc[itemName].push({
+              price: item.price || 0,
+              seller:
+                item.userDetails.firstName + ' ' + item.userDetails.lastName ||
+                'Unknown Seller',
+              id: item.id || item._id || Math.random().toString(),
+              keywords: item.keywords || [],
+            });
+            return acc;
+          },
+          {} as Record<
+            string,
+            { price: number; seller: string; id: string; keywords: string[] }[]
+          >
+        )
+      : {};
+
+  // Filter price comparison data based on query and multiple listings
+  const filteredPriceData =
+    category === 'Mobile Phones'
+      ? Object.entries(priceComparisonData).reduce(
+          (acc, [itemName, listings]) => {
+            // Only include items with two or more listings
+            if (listings.length < 2) return acc;
+
+            const matchesQuery = query
+              ? itemName.toLowerCase().includes(query.toLowerCase()) ||
+                listings.some((listing) =>
+                  listing.keywords.some((keyword: string) =>
+                    keyword.toLowerCase().includes(query.toLowerCase())
+                  )
+                )
+              : true;
+            if (matchesQuery) {
+              acc[itemName] = listings;
+            }
+            return acc;
+          },
+          {} as Record<
+            string,
+            { price: number; seller: string; id: string; keywords: string[] }[]
+          >
+        )
+      : {};
 
   // Filter items based on selected categories and query
   const filteredItems = items.filter((item: any) => {
-    // Filter by selected categories if any category is selected
     const matchesCategory = selectedCategories.length
-      ? selectedCategories.some(
-          (selectedCategory) =>
-            Array.isArray(item.category)
-              ? item.category.some(
-                  (cat: any) =>
-                    cat.toLowerCase() === selectedCategory.toLowerCase()
-                ) // Check if item.category contains the selected category (case insensitive)
-              : item.category.toLowerCase() === selectedCategory.toLowerCase() // Compare directly if item.category is a string (case insensitive)
+      ? selectedCategories.some((selectedCategory) =>
+          Array.isArray(item.category)
+            ? item.category.some(
+                (cat: any) =>
+                  cat.toLowerCase() === selectedCategory.toLowerCase()
+              )
+            : item.category.toLowerCase() === selectedCategory.toLowerCase()
         )
       : true;
 
-    // Search by keywords or other properties
     const matchesQuery = query
-      ? item.keywords.some((keyword: any) =>
+      ? item.keywords &&
+        item.keywords.some((keyword: any) =>
           keyword.toLowerCase().includes(query.toLowerCase())
         )
       : true;
@@ -81,9 +157,69 @@ const ItemsByCategory = ({ items }: { items: any[] }) => {
   return (
     <div className="h-full rounded-md bg-secondary/70 p-2 md:p-4">
       {isLoading ? (
-        <Loading /> // Display the loading component when isLoading is true
+        <Loading />
       ) : (
         <>
+          {/* Price Comparison Tool for Mobile Phones */}
+          {category === 'Mobile Phones' && (
+            <div className="mb-6">
+              <Title size="md" as="h3" className="mb-4">
+                Price Comparison
+              </Title>
+              {Object.keys(filteredPriceData).length > 0 ? (
+                <div className="space-y-4">
+                  <table className="w-full border-collapse text-sm">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border p-2 text-left">Item</th>
+                        <th className="border p-2 text-left">Seller</th>
+                        <th className="border p-2 text-left">Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(filteredPriceData).map(
+                        ([itemName, listings]) =>
+                          listings
+                            .sort((a, b) => a.price - b.price) // Sort by price (lowest first)
+                            .map((listing, index) => (
+                              <tr
+                                key={`${itemName}-${index}`}
+                                className="border-b"
+                              >
+                                {index === 0 && (
+                                  <td
+                                    className="border p-2"
+                                    rowSpan={listings.length}
+                                  >
+                                    {itemName}
+                                  </td>
+                                )}
+                                <td className="border p-2">{listing.seller}</td>
+                                <td className="border p-2">
+                                  <Link
+                                    href={`/item/${listing.id}`}
+                                    className="text-blue-600 hover:underline"
+                                  >
+                                    ${listing.price.toFixed(2)}
+                                  </Link>
+                                </td>
+                              </tr>
+                            ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <Text className="text-sm">
+                  No price comparisons available for{' '}
+                  <b>{query ? `query: ${query}` : 'Mobile Phones'}</b>
+                </Text>
+              )}
+              <Separator className="my-4" />
+            </div>
+          )}
+
+          {/* Item Grid */}
           {displayedItems.length > 0 ? (
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
               {displayedItems.map((content: any, index: number) => (

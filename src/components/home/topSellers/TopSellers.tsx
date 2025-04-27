@@ -9,13 +9,14 @@ import axios from 'axios';
 import { Button } from '@/components/ui/button';
 
 const TopSellers = () => {
+  return;
   const [items, setItems] = useState<[] | []>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     (async () => {
       try {
-        const url = `${process.env.API_URL_PREFIX}/api/items/items/`;
+        const url = `/api/items/`;
         const res = await axios.get(url);
         if (res.status === 200) {
           setItems(res.data);

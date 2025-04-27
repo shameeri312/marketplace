@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -20,20 +19,14 @@ import { menuLinks } from '@/lib/links';
 
 export function CategoriesMenu() {
   const [search, setSearch] = React.useState<string>('');
-  const [isOpen, setIsOpen] = React.useState<boolean>(false);
 
-  const filteredCategories = Object.entries(categories).filter(
-    ([key, values]) => {
-      const searchTerm = search.toLowerCase();
-      return (
-        key.toLowerCase().includes(searchTerm) ||
-        values.some((value) => value.toLowerCase().includes(searchTerm))
-      );
-    }
-  );
-
+  // Handle click on any menu item to close the menu
   const handleLinkClick = () => {
-    setIsOpen(false); // Close the menu on link click
+    // Trigger the click on the NavigationMenuTrigger to close the menu
+    const trigger = document.querySelector('.navigation-menu-trigger');
+    if (trigger) {
+      (trigger as HTMLElement).click();
+    }
   };
 
   return (
@@ -41,10 +34,7 @@ export function CategoriesMenu() {
       <NavigationMenu className="flex-1 md:w-max">
         <NavigationMenuList className="flex w-full overflow-x-auto">
           <NavigationMenuItem className="flex-shrink-0">
-            <NavigationMenuTrigger
-              onClick={() => setIsOpen(!isOpen)}
-              className="border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-            >
+            <NavigationMenuTrigger className="navigation-menu-trigger border border-input bg-background hover:bg-accent hover:text-accent-foreground">
               All Categories
             </NavigationMenuTrigger>
             <NavigationMenuContent>
@@ -58,34 +48,49 @@ export function CategoriesMenu() {
                     <Input
                       placeholder="Search category..."
                       onChange={(e) => setSearch(e.target.value)}
+                      value={search}
                     />
                   </div>
                 </div>
                 <Separator className="my-4" />
                 <div className="columns-1 gap-6 sm:columns-2 lg:columns-3 xl:columns-4">
-                  {filteredCategories.map(([key, values]) => (
-                    <div
-                      key={key}
-                      className="mb-4 w-[300px] break-inside-avoid space-y-2 xl:w-auto"
-                    >
-                      <Title size="sm" as="h3" onClick={handleLinkClick}>
-                        <Link href={`/category/${key}`}>{key}</Link>
-                      </Title>
-                      <ul className="space-y-2">
-                        {values.map((value) => (
-                          <li
-                            key={value}
-                            className="text"
+                  {Object.entries(categories)
+                    .filter(([key, values]) => {
+                      const searchTerm = search.toLowerCase();
+                      return (
+                        key.toLowerCase().includes(searchTerm) ||
+                        values.some((value) =>
+                          value.toLowerCase().includes(searchTerm)
+                        )
+                      );
+                    })
+                    .map(([key, values]) => (
+                      <div
+                        key={key}
+                        className="mb-4 w-[300px] break-inside-avoid space-y-2 xl:w-auto"
+                      >
+                        <Title size="sm" as="h3">
+                          <Link
+                            href={`/category/${key}`}
                             onClick={handleLinkClick}
                           >
-                            <Link href={`/category/${key}/${value}`}>
-                              <Text as="span">{value}</Text>
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
+                            {key}
+                          </Link>
+                        </Title>
+                        <ul className="space-y-2">
+                          {values.map((value) => (
+                            <li key={value} className="text">
+                              <Link
+                                href={`/items?query=${value}`}
+                                onClick={handleLinkClick}
+                              >
+                                <Text as="span">{value}</Text>
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
                 </div>
               </div>
             </NavigationMenuContent>

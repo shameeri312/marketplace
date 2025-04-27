@@ -147,8 +147,8 @@ import { createServer } from 'node:http';
 import { Server } from 'socket.io';
 import mongoose from 'mongoose';
 
-import Chat from './src/models/Chat.model';
-import Message from './src/models/Message.model';
+import Chat from './src/models/Chat.model.ts';
+import Message from './src/models/Message.model.ts';
 
 const hostname = '0.0.0.0';
 const port = parseInt('3001', 10);
@@ -206,8 +206,10 @@ io.on('connection', async (socket) => {
     return;
   }
 
-  socket.on('join-room', async ({ roomId, userName }) => {
-    console.log(`--> User joined room: ${roomId} with username ${userName}`);
+  socket.on('join-room', async ({ roomId, userName, chatName }) => {
+    console.log(
+      `--> User joined room: ${roomId} with username ${userName} and ${chatName}`
+    );
     socket.join(roomId);
 
     try {
@@ -219,20 +221,13 @@ io.on('connection', async (socket) => {
 
       if (!existingChat) {
         const newChat = new Chat({
-          participants: [userName],
+          participants: [userName, chatName],
           chatId: roomId,
           createdAt: new Date(),
         });
         await newChat.save();
+
         console.log(`✅ Chat room created: ${roomId}`);
-      } else {
-        if (!existingChat.participants.includes(userName)) {
-          existingChat.participants.push(userName);
-          await existingChat.save();
-          console.log(
-            `👥 Added ${userName} to participants in chat room: ${roomId}`
-          );
-        }
       }
 
       socket.to(roomId).emit('user_joined', `${userName} joined the room!`);
@@ -241,16 +236,22 @@ io.on('connection', async (socket) => {
     }
   });
 
-  socket.on('message', async ({ roomId, message, sender }) => {
-    io.to(roomId).emit('message', { sender, message, timestamp: new Date() });
+  socket.on('message', async ({ roomId, message, sender, timestamp }) => {
+    const messageData = {
+      sender,
+      message,
+      timestamp: timestamp ? new Date(timestamp) : new Date(),
+    };
 
     try {
       const newMessage = new Message({
-        sender: sender,
-        message: message,
-        roomId: roomId,
+        sender,
+        message,
+        roomId,
+        timestamp: messageData.timestamp,
       });
       await newMessage.save();
+      io.to(roomId).emit('message', newMessage);
 
       console.log(`✅ Chat message saved: ${roomId}`);
     } catch (error) {

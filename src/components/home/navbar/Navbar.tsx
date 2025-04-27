@@ -180,13 +180,15 @@ const Navbar = () => {
                       <Title size="sm" className="text-center">
                         {session?.user?.firstName} {session?.user?.lastName}
                       </Title>
-                      <Button
-                        variant={'outline'}
-                        className="border-neutral-400 font-light"
-                        size={'sm'}
-                      >
-                        Edit profile <Pencil className="text-neutral-600" />
-                      </Button>
+                      <Link href={'/profile'}>
+                        <Button
+                          variant={'outline'}
+                          className="border-neutral-400 font-light"
+                          size={'sm'}
+                        >
+                          Edit profile <Pencil className="text-neutral-600" />
+                        </Button>
+                      </Link>
                     </div>
 
                     <Separator className="mt-2" />
@@ -245,7 +247,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      <div className="shadow-m border-b border-t border-muted-foreground/20 bg-muted/30">
+      <div className="shadow-m border-b border-t border-black/20 bg-neutral-100">
         <div className="container mx-auto flex h-[60px] items-center justify-between">
           <CategoriesMenu />
 

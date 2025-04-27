@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Title } from '@/components/ui/title';
 import { categories } from '@/lib/categories';
-import React, { useState } from 'react';
+import React from 'react';
 import { Label } from '@/components/ui/label';
+import Link from 'next/link';
 
 const CategorySidebar = ({ category }: { category?: string }) => {
   // Extract subcategories for the provided category prop
@@ -18,19 +18,6 @@ const CategorySidebar = ({ category }: { category?: string }) => {
           : (category as keyof typeof categories)
       ] || []
     : [];
-
-  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>(
-    []
-  );
-
-  const handleCategoryToggle = (subcategory: string) => {
-    // Toggle subcategory selection
-    setSelectedSubcategories((prevSelected) =>
-      prevSelected.includes(subcategory)
-        ? prevSelected.filter((item) => item !== subcategory)
-        : [...prevSelected, subcategory]
-    );
-  };
 
   return (
     <div className="space-y-2 rounded-md bg-secondary/70 p-4">
@@ -47,18 +34,15 @@ const CategorySidebar = ({ category }: { category?: string }) => {
         <div className="flex flex-col gap-2 pl-2">
           {subcategories.map((subcategory: any, index: any) => (
             <div key={index} className="flex items-center gap-2 truncate">
-              <Checkbox
-                id={subcategory}
-                checked={selectedSubcategories.includes(subcategory)}
-                onCheckedChange={() => handleCategoryToggle(subcategory)}
-              />
               <Label htmlFor={subcategory}>
-                <Button
-                  className="!h-4 !p-0 font-normal text-muted-foreground hover:text-black"
-                  variant={'link'}
-                >
-                  {subcategory}
-                </Button>
+                <Link href={`/items?query=${subcategory}`}>
+                  <Button
+                    className="!h-4 !p-0 font-normal text-muted-foreground hover:text-black"
+                    variant={'link'}
+                  >
+                    {subcategory}
+                  </Button>
+                </Link>
               </Label>
             </div>
           ))}

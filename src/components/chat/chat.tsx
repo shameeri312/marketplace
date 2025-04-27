@@ -22,13 +22,17 @@ import { useSession } from 'next-auth/react';
 import Loading from '../loading/Loading';
 import { socket } from '@/lib/socketClient';
 import ChatMessage from './chatMessage';
+import { useSearchParams } from 'next/navigation';
 
 const formSchema = z.object({
   message: z.string().min(1, { message: 'Message cannot be empty' }),
 });
 
 const Chat = ({ id }: { id: string }) => {
+  const params = useSearchParams();
+
   const [messages, setMessages] = useState<any[]>([]);
+  const [userName, setUserName] = useState<string>('');
   const [chatName, setChatName] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
   const { chatColor } = useChatColorStore();
@@ -63,21 +67,26 @@ const Chat = ({ id }: { id: string }) => {
         throw new Error('Failed to fetch messages');
       }
       const data = await res.json();
-      setMessages(data); // Set initial messages from DB
+      setMessages([...data].reverse());
     } catch (error) {
       console.error('Error fetching previous messages:', error);
       toast.error('Failed to load previous messages');
     }
   }, [roomId]);
 
-  // Handle incoming messages via Socket.IO
-  const handleNewMessage = useCallback((data: any) => {
-    setMessages((prevMessages) => [...prevMessages, data]);
-  }, []);
-
   // Initialize chat: Join room, fetch messages, set up listeners
   useEffect(() => {
-    setRoomId(id); // Update roomId when id prop changes
+    setRoomId(id);
+
+    const username = params.get('user');
+    setChatName(username);
+
+    const nameFromSession =
+      session?.user?.firstName + ' ' + session?.user?.lastName;
+
+    if (nameFromSession) {
+      setUserName(nameFromSession);
+    }
 
     const initializeChat = async () => {
       if (!roomId) {
@@ -87,22 +96,32 @@ const Chat = ({ id }: { id: string }) => {
       }
 
       try {
-        // Set chatName from session or localStorage
-        const nameFromSession = session?.user?.name || 'Anonymous';
-        const storedName = localStorage.getItem('chat_name');
-        const finalChatName =
-          storedName || nameFromSession || `User_${Date.now()}`;
-        setChatName(finalChatName);
-        localStorage.setItem('chat_name', finalChatName);
+        if (nameFromSession) {
+          socket.emit('join-room', {
+            roomId,
+            userName: nameFromSession,
+            chatName: username,
+          });
+        }
 
-        // Join the room
-        socket.emit('join-room', { roomId, userName: finalChatName });
-
-        // Fetch previous messages from DB
         await fetchPreviousMessages();
 
-        // Listen for new messages
-        socket.on('message', handleNewMessage);
+        socket.on('message', (data) => {
+          setMessages((prevMessages) => {
+            const isDuplicate = prevMessages.some(
+              (msg) => msg._id === data._id
+            );
+
+            if (!isDuplicate) {
+              return [data, ...prevMessages];
+            }
+
+            return prevMessages;
+          });
+        });
+        socket.on('connect_error', () => {
+          toast.error('Failed to connect to chat server');
+        });
 
         setLoading(false);
       } catch (error) {
@@ -114,37 +133,34 @@ const Chat = ({ id }: { id: string }) => {
 
     initializeChat();
 
-    // Cleanup on unmount
     return () => {
-      socket.off('message', handleNewMessage);
-      socket.emit('leave-room', { roomId, chatName });
+      socket.off('connect_error');
+      setChatName('');
     };
-  }, [id, session, handleNewMessage, fetchPreviousMessages]);
+  }, [id, session?.user, fetchPreviousMessages]);
 
   // Handle form submission: Send message via API and Socket.IO
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const message = values.message;
 
     try {
-      const data = { roomId, message, sender: chatName, timestamp: new Date() };
+      const data = {
+        roomId,
+        message,
+        sender: userName,
+        timestamp: new Date().toISOString(),
+      };
 
-      // Optimistically update UI
-      setMessages((prevMessages) => [...prevMessages, data]);
-
-      // Send message via Socket.IO for real-time update
       socket.emit('message', data);
 
       // Reset form and focus input
       form.reset({ message: '' });
-
       if (inputRef.current) {
         inputRef.current.focus();
       }
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to send message');
-      // Revert optimistic update if send fails
-      setMessages((prevMessages) => prevMessages.slice(0, -1));
     }
   };
 
@@ -187,16 +203,19 @@ const Chat = ({ id }: { id: string }) => {
         ref={chatRef}
         className="flex-1 flex-col space-y-4 overflow-y-auto p-4"
       >
-        {messages.map((msg, i) => (
-          <ChatMessage
-            key={i}
-            color={chatColor}
-            sender={msg.sender}
-            message={msg.message}
-            isOwnMessage={msg.sender === chatName}
-            timestamp={msg.timestamp}
-          />
-        ))}
+        {[...messages].reverse().map((msg, i) => {
+          console.log(msg.sender, chatName);
+          return (
+            <ChatMessage
+              key={i}
+              color={chatColor}
+              sender={msg.sender}
+              message={msg.message}
+              isOwnMessage={msg.sender === userName}
+              timestamp={msg.timestamp}
+            />
+          );
+        })}
         <div ref={chatRef} />
       </div>
 

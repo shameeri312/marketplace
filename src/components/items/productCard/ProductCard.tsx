@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Text } from '@/components/ui/text';
 import Image from 'next/image';
 import React from 'react';
+import { Badge } from '@/components/ui/badge';
 
 const ProductCard = ({ content }: { content: any }) => {
   const router = useRouter();
@@ -16,15 +17,37 @@ const ProductCard = ({ content }: { content: any }) => {
   return (
     <Card
       onClick={() => router.push(`/item/${content._id}`)}
-      className="w-[250px] cursor-pointer space-y-3 overflow-hidden p-1 shadow-md md:w-full"
+      className="relative w-[250px] cursor-pointer space-y-3 overflow-hidden p-1 shadow-md md:w-full"
     >
-      <Image
-        src={image || '/uploads/default.jpg'}
-        alt={'product image'}
-        className="h-[120px] rounded-t-md object-cover sm:w-full md:h-[150px] xl:h-[200px]"
-        width={400}
-        height={200}
-      />
+      <div className="relative">
+        <div className="absolute right-2 top-2 flex items-end gap-1">
+          {content?.rent && (
+            <Badge
+              className="w-max border-none bg-gradient-to-r from-yellow-500 to-orange-600 uppercase text-white"
+              variant="outline"
+            >
+              For Rent
+            </Badge>
+          )}
+          {content?.exchange && (
+            <Badge
+              className="border-none bg-gradient-to-r from-yellow-500 to-orange-600 uppercase text-white"
+              variant="outline"
+            >
+              For Exchange
+            </Badge>
+          )}
+        </div>
+
+        <Image
+          src={image || '/Uploads/default.jpg'}
+          alt="product image"
+          className="h-[120px] rounded-t-md object-cover sm:w-full md:h-[150px] xl:h-[200px]"
+          width={400}
+          height={200}
+        />
+      </div>
+
       <CardContent className="md:px-auto px-2 pb-2 md:pb-0">
         <div className="flex items-center justify-between">
           <Text className="font-semibold" as="p">

@@ -43,3 +43,39 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+// POST: Save a new message
+export async function POST(req: NextRequest) {
+  const dbConnection = await connectToDB();
+  if (dbConnection instanceof NextResponse) return dbConnection;
+
+  try {
+    const { roomId, message, sender, timestamp } = await req.json();
+
+    if (!roomId || !message || !sender) {
+      return NextResponse.json(
+        { error: 'Missing required fields: roomId, message, sender' },
+        { status: 400 }
+      );
+    }
+
+    const newMessage = new Message({
+      roomId,
+      message,
+      sender,
+      timestamp: timestamp ? new Date(timestamp) : new Date(),
+    });
+
+    await newMessage.save();
+    return NextResponse.json(
+      { message: 'Message saved successfully' },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error('Error in POST /api/chats:', error);
+    return NextResponse.json(
+      { error: 'Failed to save message' },
+      { status: 500 }
+    );
+  }
+}

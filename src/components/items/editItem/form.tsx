@@ -19,8 +19,9 @@ import { toast } from 'sonner';
 import axios from 'axios';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Upload, X } from 'lucide-react';
+import { RefreshCcw, Upload, X } from 'lucide-react';
 import Image from 'next/image';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const postAdSchema = z.object({
   adTitle: z.string().min(5, 'Ad title must be at least 5 characters'),
@@ -39,6 +40,8 @@ const postAdSchema = z.object({
     .array(z.instanceof(File))
     .max(3, 'You can upload up to 3 images')
     .optional(), // Removed min(1) to allow clearing
+  rent: z.boolean().optional(),
+  exchange: z.boolean().optional(),
 });
 
 const EditForm = ({
@@ -70,6 +73,8 @@ const EditForm = ({
       selectedCategory: item?.category ?? selectedCategory,
       keywords: item?.keywords ?? '',
       images: [], // Initialize as empty array
+      rent: false,
+      exchange: false,
     },
     mode: 'onChange',
   });
@@ -136,6 +141,8 @@ const EditForm = ({
     formData.append('phoneNumber', values.phoneNumber);
     formData.append('keywords', values.keywords || '');
     formData.append('category', values.selectedCategory);
+    formData.append('rent', String(values.rent || false));
+    formData.append('exchange', String(values.exchange || false));
 
     // Append new images
     values.images?.forEach((image, index) => {
@@ -170,34 +177,123 @@ const EditForm = ({
     }
   }
 
+  const generateKeywords = async () => {
+    const adTitle = form.getValues('adTitle');
+    const category = form.getValues('selectedCategory');
+    const name = form.getValues('name');
+
+    // Trigger validation for the relevant fields
+    const isValid = await form.trigger(['adTitle', 'selectedCategory', 'name']);
+
+    if (!isValid) {
+      toast.error(
+        'Please fill in Ad Title, Category, and Name before generating keywords.'
+      );
+      return;
+    }
+
+    try {
+      const response = await axios.post('/api/genai/generate-keywords', {
+        title: adTitle,
+        category,
+        name,
+      });
+
+      const keywords = response.data.keywords;
+
+      if (keywords && Array.isArray(keywords)) {
+        form.setValue('keywords', keywords.join(', '));
+        toast.success('Keywords generated successfully!');
+      } else {
+        toast.error('No keywords generated.');
+      }
+    } catch (error: any) {
+      console.error('Error generating keywords:', error);
+      toast.error(
+        'Failed to generate keywords: ' +
+          (error.response?.data?.error || error.message)
+      );
+    }
+  };
+
+  const formGroupStyles =
+    'grid sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 gap-4 w-full';
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="selectedCategory"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Category</FormLabel>
-              <FormControl>
-                <Input readOnly className="w-full bg-gray-100" {...field} />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="adTitle"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Ad Title</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4 bg-white"
+      >
+        <div className={'flex flex-wrap items-center gap-4'}>
+          <FormLabel>Post Type:</FormLabel>
+          <FormField
+            control={form.control}
+            name="rent"
+            render={({ field }) => (
+              <FormItem className="flex w-max flex-row items-start gap-4 space-y-0 rounded-md border border-input p-3">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="cursor-pointer">For Rent</FormLabel>
+
+                  <FormMessage />
+                </div>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="exchange"
+            render={({ field }) => (
+              <FormItem className="flex w-max flex-row items-start gap-4 space-y-0 rounded-md border border-input p-3">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  <FormLabel className="cursor-pointer">For Exchange</FormLabel>
+
+                  <FormMessage />
+                </div>
+              </FormItem>
+            )}
+          />
+        </div>
+        <div className={formGroupStyles}>
+          <FormField
+            control={form.control}
+            name="selectedCategory"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Category</FormLabel>
+                <FormControl>
+                  <Input readOnly className="w-full bg-gray-100" {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="adTitle"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ad Title</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         <FormField
           control={form.control}
           name="description"
@@ -211,132 +307,157 @@ const EditForm = ({
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="keywords"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Add keywords separated by (,)</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Price</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="currency"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Currency</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="phoneNumber"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Phone Number</FormLabel>
-              <FormControl>
-                <Input type="tel" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="street"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Enter Street</FormLabel>
-              <FormControl>
-                <Input type="text" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="city"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Enter City</FormLabel>
-              <FormControl>
-                <Input type="text" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="state"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Enter State</FormLabel>
-              <FormControl>
-                <Input type="text" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="postalCode"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Enter Postal Code</FormLabel>
-              <FormControl>
-                <Input type="text" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
+        <div className={formGroupStyles}>
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="phoneNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone Number</FormLabel>
+                <FormControl>
+                  <Input type="tel" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="flex items-end gap-4">
+          <FormField
+            control={form.control}
+            name="keywords"
+            render={({ field }) => (
+              <FormItem className="flex-1">
+                <FormLabel>Add keywords separated by (,)</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button
+            type="button"
+            size={'icon'}
+            onClick={generateKeywords}
+            variant={'secondary'}
+          >
+            <RefreshCcw />
+          </Button>
+        </div>
+
+        <div className={formGroupStyles}>
+          <FormField
+            control={form.control}
+            name="price"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Price</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="currency"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Currency</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className={formGroupStyles}>
+          <FormField
+            control={form.control}
+            name="street"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Enter Street</FormLabel>
+                <FormControl>
+                  <Input type="text" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="city"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Enter City</FormLabel>
+                <FormControl>
+                  <Input type="text" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className={formGroupStyles}>
+          <FormField
+            control={form.control}
+            name="state"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Enter State</FormLabel>
+                <FormControl>
+                  <Input type="text" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="postalCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Enter Postal Code</FormLabel>
+                <FormControl>
+                  <Input type="text" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
         {/* Image Upload */}
         <FormField
           control={form.control}
           name="images"
           render={() => (
             <FormItem>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-4">
                 <FormLabel>Upload Images (Max 3)</FormLabel>
-                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-primary px-2 py-1 text-sm text-primary hover:bg-primary/80">
+                <label className="flex cursor-pointer items-center gap-4 rounded-lg border border-primary px-2 py-1 text-sm text-primary hover:bg-primary/80 hover:text-primary-foreground">
                   <Upload size={16} /> Upload Images
                   <input
                     type="file"
@@ -348,8 +469,8 @@ const EditForm = ({
                 </label>
               </div>
               <FormControl>
-                <div className="flex flex-col items-start gap-2">
-                  <div className="flex gap-2">
+                <div className="flex flex-col items-start gap-4">
+                  <div className="flex gap-4">
                     {imagePreviews.map((src, index) => (
                       <div key={index} className="relative">
                         <Image
@@ -376,7 +497,7 @@ const EditForm = ({
           )}
         />
         <Button disabled={loading} type="submit">
-          {loading ? 'Submitting...' : 'Update Ad'}
+          {loading ? 'Submitting...' : 'Post Now'}
         </Button>
       </form>
     </Form>
