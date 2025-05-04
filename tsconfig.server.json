@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "esnext", // Target modern Node.js (adjust based on your Node.js version)
+    "module": "commonjs", // Use CommonJS for Node.js compatibility
+    "outDir": "dist", // Output compiled files to the dist/ directory
+    "rootDir": ".", // Root directory of your source files
+    "strict": true, // Enable strict type-checking
+    "esModuleInterop": true, // Enable interoperability between CommonJS and ES Modules
+    "skipLibCheck": true, // Skip type checking of declaration files for faster compilation
+    "forceConsistentCasingInFileNames": true, // Enforce consistent file casing
+    "moduleResolution": "node", // Use Node.js module resolution
+    "noEmitOnError": true // Prevent emitting output if there are errors
+  },
+  "include": [
+    "server.ts", // Include server.ts
+    "src/models/**/*" // Include all files in src/models/ (e.g., Chat.model.ts, Message.model.ts)
+  ],
+  "exclude": [
+    "node_modules", // Exclude node_modules
+    "pages/**/*", // Exclude Next.js pages
+    "app/**/*", // Exclude Next.js app directory (if using app router)
+    "public/**/*", // Exclude public assets
+    ".next/**/*" // Exclude Next.js build output
+  ]
+}
